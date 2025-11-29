@@ -1,40 +1,127 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package br.edu.ufrb.estruturadados;
 
-import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ItemEvent;
+import javax.swing.*;
 
-/**
- *
- * @author 2401210
- */
 public class VisualizadorFrame extends JFrame {
-     private JComboBox<String> seletorDeEstrutura;
+
+    private JComboBox<String> seletorDeEstrutura;
     private JPanel painelDeVisualizacao;
     private CardLayout cardLayout;
 
+    private static final int LARGURA_JANELA = 1000;
+    private static final int ALTURA_JANELA = 700;
+    private static final String TITULO_APLICACAO = "Visualizador de Estruturas de Dados";
+
     public VisualizadorFrame() {
-        // Configurações básicas da janela
-        setTitle("Visualizador de Estruturas de Dados");
-        setSize(800, 600);
+        configurarJanela();
+        inicializarComponentes();
+        setVisible(true);
+    }
+
+    private void configurarJanela() {
+        setTitle(TITULO_APLICACAO);
+        setSize(LARGURA_JANELA, ALTURA_JANELA);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setLocationRelativeTo(null); // Centraliza na tela
-
-        // Layout principal
+        setLocationRelativeTo(null);
         setLayout(new BorderLayout(10, 10));
+        getContentPane().setBackground(Tema.BACKGROUND);
+    }
 
-        // --- Painel Superior: Seletor ---
-        JPanel painelSuperior = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        painelSuperior.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
-        painelSuperior.add(new JLabel("Selecione a Estrutura:"));
+    private void inicializarComponentes() {
+        add(criarPainelSuperior(), BorderLayout.NORTH);
+        add(criarPainelCentral(), BorderLayout.CENTER);
+        add(criarPainelRodape(), BorderLayout.SOUTH);
+    }
 
-        String[] estruturas = {
-            "Array (Lista Dinâmica)", 
-            "Lista Ligada (Simples)", 
+    private JPanel criarPainelSuperior() {
+        JPanel painelSuperior = ComponentesUI.criarPainelGradiente(
+                Tema.PRIMARY_DARK, Tema.PRIMARY
+        );
+        painelSuperior.setLayout(new BorderLayout(15, 0));
+        painelSuperior.setBorder(BorderFactory.createEmptyBorder(20, 25, 20, 25));
+
+        JPanel painelTitulo = new JPanel();
+        painelTitulo.setLayout(new BoxLayout(painelTitulo, BoxLayout.Y_AXIS));
+        painelTitulo.setOpaque(false);
+
+        JLabel titulo = ComponentesUI.criarLabelEstilizado(TITULO_APLICACAO, "heading");
+        titulo.setForeground(Color.WHITE);
+        titulo.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+        painelTitulo.add(Box.createVerticalGlue());
+        painelTitulo.add(titulo);
+        painelTitulo.add(Box.createVerticalGlue());
+
+        painelSuperior.add(painelTitulo, BorderLayout.WEST);
+        painelSuperior.add(criarPainelSeletor(), BorderLayout.EAST);
+
+        return painelSuperior;
+    }
+
+    private JPanel criarPainelSeletor() {
+        JPanel painelSeletor = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 0));
+        painelSeletor.setOpaque(false);
+
+        JLabel labelSeletor = ComponentesUI.criarLabelEstilizado(
+                "Selecione a Estrutura:", "subheading");
+        labelSeletor.setForeground(Color.WHITE);
+        painelSeletor.add(labelSeletor);
+
+        seletorDeEstrutura = ComponentesUI.criarComboBoxModerno(obterNomesEstruturas());
+        seletorDeEstrutura.setBackground(Color.WHITE);
+        seletorDeEstrutura.setForeground(Tema.TEXT_PRIMARY);
+        seletorDeEstrutura.setPreferredSize(new Dimension(280, 35));
+
+        seletorDeEstrutura.addItemListener(e -> {
+            if (e.getStateChange() == ItemEvent.SELECTED) {
+                String estruturaSelecionada = (String) e.getItem();
+                cardLayout.show(painelDeVisualizacao, estruturaSelecionada);
+            }
+        });
+
+        painelSeletor.add(seletorDeEstrutura);
+        return painelSeletor;
+    }
+
+    private JPanel criarPainelCentral() {
+        cardLayout = new CardLayout();
+        painelDeVisualizacao = new JPanel(cardLayout);
+        painelDeVisualizacao.setBackground(Tema.BACKGROUND);
+
+        registrarPaineisDeEstruturas();
+
+        return painelDeVisualizacao;
+    }
+
+    private void registrarPaineisDeEstruturas() {
+        // Mapa de estruturas (nome -> painel)
+        String[] nomes = obterNomesEstruturas();
+        JPanel[] paineis = {
+            new ArrayPanel(),
+            new ListaLigadaPanel(),
+            new ListaDuplamenteEncadeadaPanel(),
+            new PilhaSwingApp(),
+            new FilaSwingApp(),
+            new OrdenacaoPanel(),
+            new BuscaBinariaPanel(),
+            new ArvoreBinariaNaoOrdenadaPanel(),
+            new ArvoreBinariaNaoBalanceadaPanel(),
+            new HashMapPanel(),
+            new ArvoreAVL(),
+            new GrafosDijkstraPanel()
+        };
+
+        for (int i = 0; i < nomes.length; i++) {
+            painelDeVisualizacao.add(paineis[i], nomes[i]);
+        }
+    }
+
+    private String[] obterNomesEstruturas() {
+        return new String[]{
+            "Array (Lista Dinâmica)",
+            "Lista Ligada (Simples)",
             "Lista Duplamente Encadeada",
             "Pilha",
             "Fila",
@@ -46,36 +133,19 @@ public class VisualizadorFrame extends JFrame {
             "Árvore AVL",
             "Grafos (BFS e Dijkstra)"
         };
-        seletorDeEstrutura = new JComboBox<>(estruturas);
-        painelSuperior.add(seletorDeEstrutura);
+    }
 
-        add(painelSuperior, BorderLayout.NORTH);
+    private JPanel criarPainelRodape() {
+        JPanel painelRodape = ComponentesUI.criarPainelModerno();
+        painelRodape.setLayout(new FlowLayout(FlowLayout.CENTER, 15, 10));
+        painelRodape.setBorder(BorderFactory.createEmptyBorder(5, 15, 5, 15));
 
-        // --- Painel Central: Visualização (com CardLayout) ---
-        cardLayout = new CardLayout();
-        painelDeVisualizacao = new JPanel(cardLayout);
+        JLabel labelInfo = ComponentesUI.criarLabelEstilizado(
+                "© 2025 | UFRB | Programa de Pós-graduação em Engenharia Elétrica e Computação | Estrutura de Dados | Versão 1.0",
+                 "body");
+        labelInfo.setForeground(Tema.TEXT_SECONDARY);
 
-        // Adiciona os painéis de cada estrutura
-        painelDeVisualizacao.add(new ArrayPanel(), "Array (Lista Dinâmica)");
-        painelDeVisualizacao.add(new ListaLigadaPanel(), "Lista Ligada (Simples)");
-        painelDeVisualizacao.add(new ListaDuplamenteEncadeadaPanel(), "Lista Duplamente Encadeada");
-        painelDeVisualizacao.add(new PilhaSwingApp(), "Pilha");
-        painelDeVisualizacao.add(new FilaSwingApp(), "Fila");
-        painelDeVisualizacao.add(new OrdenacaoPanel(), "Métodos de Ordenação");
-        painelDeVisualizacao.add(new BuscaBinariaPanel(), "Busca Binária");
-        painelDeVisualizacao.add(new ArvoreBinariaNaoOrdenadaPanel(), "Árvore Binária Não Ordenada");
-        painelDeVisualizacao.add(new ArvoreBinariaNaoBalanceadaPanel(), "Árvore Binária de Busca (Não Balanceada)");
-        painelDeVisualizacao.add(new HashMapPanel(), "Hash Map Simples (Tabela Hash)");
-        painelDeVisualizacao.add(new ArvoreAVL(), "Árvore AVL");
-        painelDeVisualizacao.add(new GrafosDijkstraPanel(), "Grafos (BFS e Dijkstra)");
-
-        add(painelDeVisualizacao, BorderLayout.CENTER);
-
-        // --- Lógica para trocar de painel ---
-        seletorDeEstrutura.addItemListener(e -> {
-            if (e.getStateChange() == ItemEvent.SELECTED) {
-                cardLayout.show(painelDeVisualizacao, (String) e.getItem());
-            }
-        });
+        painelRodape.add(labelInfo);
+        return painelRodape;
     }
 }

@@ -1,17 +1,12 @@
 package br.edu.ufrb.estruturadados;
 
-import javax.swing.*;
 import java.awt.*;
+import javax.swing.*;
 
 public class ArvoreBinariaNaoOrdenadaPanel extends JPanel {
 
-    /**
-     *
-     * @author Alex do Nascimento Ambrosio
-     */
-
-    // Classe interna para representar um nó da árvore
     private static class No {
+
         String valor;
         No esquerda;
         No direita;
@@ -22,9 +17,10 @@ public class ArvoreBinariaNaoOrdenadaPanel extends JPanel {
             this.direita = null;
         }
     }
-    
+
     // Classe auxiliar para passar múltiplas informações da busca recursiva de remoção
     private static class InfoUltimoNo {
+
         No no = null;
         No pai = null;
         int nivel = 0;
@@ -35,62 +31,46 @@ public class ArvoreBinariaNaoOrdenadaPanel extends JPanel {
     private JButton botaoAdicionar, botaoRemover;
     private VisualizacaoPanel painelDesenho;
 
-    // Constantes para o desenho da árvore
-    private static final int DIAMETRO_NO = 40;
-    private static final int ESPACO_VERTICAL = 60;
-
     public ArvoreBinariaNaoOrdenadaPanel() {
-        raiz = null;
         setLayout(new BorderLayout(10, 10));
-        setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+        setBorder(BorderFactory.createEmptyBorder(15, 15, 15, 15));
+        setBackground(Tema.BACKGROUND);
 
-        // --- Painel de Controles ---
-        JPanel painelControles = new JPanel();
-        campoDeEntrada = new JTextField(10);
-        botaoAdicionar = new JButton("Adicionar");
-        botaoRemover = new JButton("Remover (por valor)");
+        JPanel painelControles = ComponentesUI.criarPainelModerno();
+        campoDeEntrada = ComponentesUI.criarCampoTextoModerno(8);
+        botaoAdicionar = ComponentesUI.criarBotaoModerno("Adicionar", Tema.PRIMARY);
+        botaoRemover = ComponentesUI.criarBotaoModerno("Remover (por valor)", Tema.ERROR);
 
-        painelControles.add(new JLabel("Valor:"));
+        painelControles.add(ComponentesUI.criarLabelEstilizado("Valor:", "subheading"));
         painelControles.add(campoDeEntrada);
         painelControles.add(botaoAdicionar);
         painelControles.add(botaoRemover);
-
         add(painelControles, BorderLayout.NORTH);
 
-        // --- Painel de Visualização ---
         painelDesenho = new VisualizacaoPanel();
-        add(painelDesenho, BorderLayout.CENTER);
+        add(new JScrollPane(painelDesenho), BorderLayout.CENTER);
 
-        // --- Painel de Texto de Definição ---
-        JTextArea textoDefinicao = new JTextArea();
-        textoDefinicao.setEditable(false);
-        textoDefinicao.setFont(new Font("Serif", Font.ITALIC, 14));
-        textoDefinicao.setLineWrap(true);
-        textoDefinicao.setWrapStyleWord(true);
+        JTextArea textoDefinicao = ComponentesUI.criarAreaTextoEstilizada();
         textoDefinicao.setText(getDefinicao());
         JScrollPane scrollPane = new JScrollPane(textoDefinicao);
-        scrollPane.setPreferredSize(new Dimension(100, 120)); // Altura do painel
+        scrollPane.setBorder(null);
+        scrollPane.setPreferredSize(new Dimension(Tema.FIELD_WIDTH_CODE, Tema.FIELD_HEIGHT_INFO));
         add(scrollPane, BorderLayout.SOUTH);
 
-        // --- Lógica dos Botões (Listeners) ---
         botaoAdicionar.addActionListener(e -> adicionarElemento());
         botaoRemover.addActionListener(e -> removerElemento());
     }
 
     private String getDefinicao() {
-        return "ÁRVORE BINÁRIA NÃO ORDENADA:\n\n" +
-                "É uma estrutura de dados hierárquica em que cada nó tem no máximo dois filhos, " +
-                "geralmente referidos como filho da esquerda e filho da direita. O nó no topo da hierarquia é chamado de raiz.\n"
-                +
-                "Nesta visualização (não ordenada), os nós são adicionados no primeiro espaço disponível da esquerda para a direita, nível por nível.\n"
-                +
-                "Prós: Representação eficiente de hierarquias. A busca pode ser eficiente (O(log n)) se a árvore for balanceada (como em uma Árvore de Busca Binária).\n"
-                +
-                "Contras: Em uma árvore não ordenada como esta, a busca é O(n), pois pode ser necessário percorrer todos os nós.";
+        return "ÁRVORE BINÁRIA NÃO ORDENADA:\n\n"
+                + "É uma estrutura de dados hierárquica em que cada nó tem no máximo dois filhos, "
+                + "geralmente referidos como filho da esquerda e filho da direita. O nó no topo da hierarquia é chamado de raiz.\n"
+                + "Nesta visualização (não ordenada), os nós são adicionados no primeiro espaço disponível da esquerda para a direita, nível por nível.\n"
+                + "Prós: Representação eficiente de hierarquias. A busca pode ser eficiente (O(log n)) se a árvore for balanceada (como em uma Árvore de Busca Binária).\n"
+                + "Contras: Em uma árvore não ordenada como esta, a busca é O(n), pois pode ser necessário percorrer todos os nós.";
     }
 
     // --- MÉTODOS DE MANIPULAÇÃO DA ÁRVORE ---
-
     private void adicionarElemento() {
         String valor = campoDeEntrada.getText().trim();
         if (valor.isEmpty()) {
@@ -126,7 +106,6 @@ public class ArvoreBinariaNaoOrdenadaPanel extends JPanel {
             return;
         }
 
-        // 1. Encontrar o nó a ser removido
         No noParaRemover = buscarNo(raiz, valor);
 
         if (noParaRemover == null) {
@@ -134,7 +113,7 @@ public class ArvoreBinariaNaoOrdenadaPanel extends JPanel {
             return;
         }
 
-        // 2. Encontrar o último nó (o mais profundo e à direita)
+        // Encontrar o último nó (o mais profundo e à direita)
         InfoUltimoNo info = new InfoUltimoNo();
         encontrarUltimoNo(raiz, null, 1, info);
         No ultimoNo = info.no;
@@ -153,10 +132,10 @@ public class ArvoreBinariaNaoOrdenadaPanel extends JPanel {
                 }
             }
         } else {
-            // 3. Troca o valor do nó a ser removido pelo valor do último nó
+            // Troca o valor do nó a ser removido pelo valor do último nó
             noParaRemover.valor = ultimoNo.valor;
 
-            // 4. Remove a referência ao último nó do seu pai
+            // Remove a referência ao último nó do seu pai
             if (paiDoUltimo.direita == ultimoNo) {
                 paiDoUltimo.direita = null;
             } else {
@@ -167,9 +146,8 @@ public class ArvoreBinariaNaoOrdenadaPanel extends JPanel {
         campoDeEntrada.setText("");
         painelDesenho.repaint();
     }
-    
-    // --- MÉTODOS AUXILIARES RECURSIVOS ---
 
+    // --- MÉTODOS AUXILIARES RECURSIVOS ---
     /**
      * Calcula a altura de uma árvore/sub-árvore.
      */
@@ -181,7 +159,8 @@ public class ArvoreBinariaNaoOrdenadaPanel extends JPanel {
     }
 
     /**
-     * Tenta inserir um novo nó em um nível específico. Retorna true se conseguiu.
+     * Tenta inserir um novo nó em um nível específico. Retorna true se
+     * conseguiu.
      */
     private boolean tentarInserirNoNivel(No noAtual, No novoNo, int nivelAlvo, int nivelAtual) {
         if (noAtual == null) {
@@ -206,7 +185,7 @@ public class ArvoreBinariaNaoOrdenadaPanel extends JPanel {
         }
         return tentarInserirNoNivel(noAtual.direita, novoNo, nivelAlvo, nivelAtual + 1);
     }
-    
+
     /**
      * Busca um nó com um valor específico na árvore.
      */
@@ -231,7 +210,7 @@ public class ArvoreBinariaNaoOrdenadaPanel extends JPanel {
         if (noAtual == null) {
             return;
         }
-        
+
         // Se encontrarmos um nó em um nível mais profundo, ele se torna o novo "último"
         // O ">=" garante que, no mesmo nível, o nó mais à direita será o escolhido
         if (nivel >= info.nivel) {
@@ -239,51 +218,53 @@ public class ArvoreBinariaNaoOrdenadaPanel extends JPanel {
             info.pai = pai;
             info.nivel = nivel;
         }
-        
+
         encontrarUltimoNo(noAtual.esquerda, noAtual, nivel + 1, info);
         encontrarUltimoNo(noAtual.direita, noAtual, nivel + 1, info);
     }
 
-
     // --- CLASSE INTERNA DE DESENHO ---
     private class VisualizacaoPanel extends JPanel {
+
+        public VisualizacaoPanel() {
+            setBackground(Color.WHITE);
+            setBorder(BorderFactory.createLineBorder(Tema.BORDER));
+        }
+
         @Override
         protected void paintComponent(Graphics g) {
             super.paintComponent(g);
+            Graphics2D g2d = (Graphics2D) g;
+            g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
             if (raiz != null) {
-                Graphics2D g2d = (Graphics2D) g;
-                g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-                desenharArvore(g2d, raiz, getWidth() / 2, 30, getWidth() / 4);
+                desenhar((Graphics2D) g, raiz, getWidth() / 2, 40, getWidth() / 4);
+            } else {
+                g2d.setFont(Tema.FONT_SUBHEADING);
+                g2d.setColor(Tema.TEXT_SECONDARY);
+                g2d.drawString("Árvore vazia. Adicione elementos para visualizar.", getWidth() / 2 - 40, getHeight() / 2);
             }
         }
 
-        private void desenharArvore(Graphics2D g2d, No no, int x, int y, int espacoHorizontal) {
+        private void desenhar(Graphics2D g, No no, int x, int y, int offset) {
             if (no == null) {
                 return;
             }
-            // Desenha o nó
-            g2d.setColor(Color.ORANGE);
-            g2d.fillOval(x - DIAMETRO_NO / 2, y - DIAMETRO_NO / 2, DIAMETRO_NO, DIAMETRO_NO);
-            g2d.setColor(Color.BLACK);
-            g2d.drawOval(x - DIAMETRO_NO / 2, y - DIAMETRO_NO / 2, DIAMETRO_NO, DIAMETRO_NO);
-            // Desenha o valor
-            FontMetrics fm = g2d.getFontMetrics();
-            int stringWidth = fm.stringWidth(no.valor);
-            g2d.drawString(no.valor, x - stringWidth / 2, y + fm.getAscent() / 2);
-            // Desenha a conexão e o filho da esquerda
             if (no.esquerda != null) {
-                int xEsquerda = x - espacoHorizontal;
-                int yEsquerda = y + ESPACO_VERTICAL;
-                g2d.drawLine(x, y + DIAMETRO_NO / 2, xEsquerda, yEsquerda - DIAMETRO_NO / 2);
-                desenharArvore(g2d, no.esquerda, xEsquerda, yEsquerda, espacoHorizontal / 2);
+                g.setColor(Tema.TREE_EDGE);
+                g.setStroke(new BasicStroke(2));
+                g.drawLine(x, y, x - offset, y + 60);
+                desenhar(g, no.esquerda, x - offset, y + 60, offset / 2);
             }
-            // Desenha a conexão e o filho da direita
             if (no.direita != null) {
-                int xDireita = x + espacoHorizontal;
-                int yDireita = y + ESPACO_VERTICAL;
-                g2d.drawLine(x, y + DIAMETRO_NO / 2, xDireita, yDireita - DIAMETRO_NO / 2);
-                desenharArvore(g2d, no.direita, xDireita, yDireita, espacoHorizontal / 2);
+                g.setColor(Tema.TREE_EDGE);
+                g.drawLine(x, y, x + offset, y + 60);
+                desenhar(g, no.direita, x + offset, y + 60, offset / 2);
             }
+
+            g.setColor(Tema.TREE_NODE);
+            g.fillOval(x - 20, y - 20, 40, 40);
+            g.setColor(Color.WHITE);
+            g.drawString(no.valor, x - 5, y + 5);
         }
     }
 }

@@ -1,19 +1,12 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package br.edu.ufrb.estruturadados;
 
-import javax.swing.*;
 import java.awt.*;
+import javax.swing.*;
 
-/**
- *
- * @author 2401210
- */
 public class ListaDuplamenteEncadeadaPanel extends JPanel {
-    // Classe interna para representar nosso Nó Duplo
+
     private static class Node {
+
         String data;
         Node prev;
         Node next;
@@ -30,65 +23,70 @@ public class ListaDuplamenteEncadeadaPanel extends JPanel {
     private int size = 0;
 
     private JTextField campoValor, campoIndice;
-    private JButton botaoAddInicio, botaoAddFim, botaoRemover;
     private VisualizacaoPanel painelDesenho;
 
     public ListaDuplamenteEncadeadaPanel() {
-        head = null;
-        tail = null;
-
-        // --- Configuração do Layout e Controles (similar aos outros painéis) ---
         setLayout(new BorderLayout(10, 10));
-        setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+        setBorder(BorderFactory.createEmptyBorder(15, 15, 15, 15));
+        setBackground(Tema.BACKGROUND);
 
-        JPanel painelControles = new JPanel(new GridBagLayout());
+        JPanel painelControles = ComponentesUI.criarPainelModerno();
+        painelControles.setLayout(new GridBagLayout());
         GridBagConstraints gbc = new GridBagConstraints();
-        gbc.insets = new Insets(2, 5, 2, 5);
+        gbc.insets = new Insets(5, 5, 5, 5);
 
-        campoValor = new JTextField(8);
-        campoIndice = new JTextField(4);
-        botaoAddInicio = new JButton("Adicionar no Início");
-        botaoAddFim = new JButton("Adicionar no Fim");
-        botaoRemover = new JButton("Remover (por índice)");
+        campoValor = ComponentesUI.criarCampoTextoModerno(8);
+        campoIndice = ComponentesUI.criarCampoTextoModerno(4);
+        JButton btnAddIni = ComponentesUI.criarBotaoModerno("Adicionar no início", Tema.PRIMARY);
+        JButton btnAddFim = ComponentesUI.criarBotaoModerno("Adicionar no fim", Tema.SECONDARY);
+        JButton btnRemover = ComponentesUI.criarBotaoModerno("Remover (por índice)", Tema.ERROR);
 
-        gbc.gridx = 0; gbc.gridy = 0; painelControles.add(new JLabel("Valor:"), gbc);
-        gbc.gridx = 1; gbc.gridy = 0; painelControles.add(campoValor, gbc);
-        gbc.gridx = 2; gbc.gridy = 0; painelControles.add(botaoAddInicio, gbc);
-        gbc.gridx = 3; gbc.gridy = 0; painelControles.add(botaoAddFim, gbc);
-        gbc.gridx = 0; gbc.gridy = 1; painelControles.add(new JLabel("Índice:"), gbc);
-        gbc.gridx = 1; gbc.gridy = 1; painelControles.add(campoIndice, gbc);
-        gbc.gridx = 2; gbc.gridy = 1; painelControles.add(botaoRemover, gbc);
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        painelControles.add(ComponentesUI.criarLabelEstilizado("Valor:", "subheading"), gbc);
+        gbc.gridx = 1;
+        painelControles.add(campoValor, gbc);
+        gbc.gridx = 2;
+        painelControles.add(btnAddIni, gbc);
+        gbc.gridx = 3;
+        painelControles.add(btnAddFim, gbc);
+        gbc.gridx = 0;
+        gbc.gridy = 1;
+        painelControles.add(ComponentesUI.criarLabelEstilizado("Índice:", "subheading"), gbc);
+        gbc.gridx = 1;
+        painelControles.add(campoIndice, gbc);
+        gbc.gridx = 2;
+        gbc.gridwidth = 2;
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        painelControles.add(btnRemover, gbc);
 
         add(painelControles, BorderLayout.NORTH);
 
         painelDesenho = new VisualizacaoPanel();
-        add(painelDesenho, BorderLayout.CENTER);
+        add(new JScrollPane(painelDesenho), BorderLayout.CENTER);
 
-        JTextArea textoDefinicao = new JTextArea(getDefinicao());
-        textoDefinicao.setEditable(false);
-        textoDefinicao.setFont(new Font("Serif", Font.ITALIC, 14));
-        textoDefinicao.setLineWrap(true);
-        textoDefinicao.setWrapStyleWord(true);
+        JTextArea textoDefinicao = ComponentesUI.criarAreaTextoEstilizada();
+        textoDefinicao.setText(getDefinicao());
+
         JScrollPane scrollPane = new JScrollPane(textoDefinicao);
-        scrollPane.setPreferredSize(new Dimension(100, 120));
+        scrollPane.setBorder(null);
+        scrollPane.setPreferredSize(new Dimension(Tema.FIELD_WIDTH_CODE, Tema.FIELD_HEIGHT_INFO));
         add(scrollPane, BorderLayout.SOUTH);
 
-        // --- Listeners dos Botões ---
-        botaoAddFim.addActionListener(e -> adicionarNoFim());
-        botaoAddInicio.addActionListener(e -> adicionarNoInicio());
-        botaoRemover.addActionListener(e -> removerElemento());
+        btnAddFim.addActionListener(e -> adicionarNoFim());
+        btnAddIni.addActionListener(e -> adicionarNoInicio());
+        btnRemover.addActionListener(e -> removerElemento());
     }
 
     private String getDefinicao() {
-        return "LISTA DUPLAMENTE ENCADEADA:\n\n" +
-               "Uma versão avançada da lista encadeada. Cada 'nó' armazena um valor, um ponteiro para o próximo nó, e um ponteiro para o nó anterior. " +
-               "Isso permite que a lista seja percorrida em ambas as direções (para frente e para trás).\n" +
-               "Prós: Remoção de um nó é mais eficiente (se você já tem a referência para ele) e a travessia reversa é trivial.\n" +
-               "Contras: Usa mais memória devido ao ponteiro extra para o nó anterior.";
+        return "LISTA DUPLAMENTE ENCADEADA:\n\n"
+                + "Uma versão avançada da lista encadeada. Cada 'nó' armazena um valor, um ponteiro para o próximo nó, e um ponteiro para o nó anterior. "
+                + "Isso permite que a lista seja percorrida em ambas as direções (para frente e para trás).\n"
+                + "Prós: Remoção de um nó é mais eficiente (se você já tem a referência para ele) e a travessia reversa é trivial.\n"
+                + "Contras: Usa mais memória devido ao ponteiro extra para o nó anterior.";
     }
 
     // --- Lógica de Manipulação da Lista ---
-
     private void adicionarNoInicio() {
         String valor = campoValor.getText().trim();
         if (valor.isEmpty()) {
@@ -176,98 +174,64 @@ public class ListaDuplamenteEncadeadaPanel extends JPanel {
 
     // --- Classe de Desenho ---
     private class VisualizacaoPanel extends JPanel {
-        private static final int DATA_WIDTH = 70;
-        private static final int POINTER_WIDTH = 25;
-        private static final int NODE_HEIGHT = 40;
-        private static final int H_GAP = 40;
+
+        public VisualizacaoPanel() {
+            setBackground(Color.WHITE);
+            setBorder(BorderFactory.createLineBorder(Tema.BORDER));
+        }
 
         @Override
         protected void paintComponent(Graphics g) {
             super.paintComponent(g);
             Graphics2D g2d = (Graphics2D) g;
             g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-            g2d.setFont(new Font("Arial", Font.BOLD, 14));
 
             if (head == null) {
-                g2d.drawString("A lista está vazia.", getWidth() / 2 - 70, getHeight() / 2);
+                g2d.setFont(Tema.FONT_SUBHEADING);
+                g2d.setColor(Tema.TEXT_SECONDARY);
+                g2d.drawString("Lista Vazia.", getWidth() / 2 - 40, getHeight() / 2);
                 return;
             }
 
-            int startX = 20;
-            int y = getHeight() / 2 - NODE_HEIGHT / 2;
+            int w = 80, h = 40, gap = 50, x = 20, y = 80;
             Node atual = head;
-            int i = 0;
 
             while (atual != null) {
-                int nodeX = startX + i * (POINTER_WIDTH + DATA_WIDTH + POINTER_WIDTH + H_GAP);
+                // Nó Central
+                g2d.setColor(Tema.NODE_DATA);
+                g2d.fillRoundRect(x + 20, y, w - 40, h, 5, 5);
+                g2d.setColor(Color.WHITE);
+                g2d.drawString(atual.data, x + 35, y + 25);
 
-                // --- Desenho do Nó ---
-                // Caixa do ponteiro ANTERIOR
-                g2d.setColor(new Color(255, 204, 204)); // Vermelho claro
-                g2d.fillRect(nodeX, y, POINTER_WIDTH, NODE_HEIGHT);
-                g2d.setColor(Color.BLACK);
-                g2d.drawRect(nodeX, y, POINTER_WIDTH, NODE_HEIGHT);
+                // Ponteiros (Caixas)
+                g2d.setColor(Tema.NODE_POINTER);
+                g2d.fillRoundRect(x, y, 20, h, 5, 5); // Prev
+                g2d.fillRoundRect(x + w - 20, y, 20, h, 5, 5); // Next
 
-                // Caixa do DADO
-                g2d.setColor(new Color(204, 255, 204)); // Verde claro
-                g2d.fillRect(nodeX + POINTER_WIDTH, y, DATA_WIDTH, NODE_HEIGHT);
-                g2d.setColor(Color.BLACK);
-                g2d.drawRect(nodeX + POINTER_WIDTH, y, DATA_WIDTH, NODE_HEIGHT);
-
-                // Caixa do ponteiro PRÓXIMO
-                g2d.setColor(new Color(204, 204, 255)); // Azul claro
-                g2d.fillRect(nodeX + POINTER_WIDTH + DATA_WIDTH, y, POINTER_WIDTH, NODE_HEIGHT);
-                g2d.setColor(Color.BLACK);
-                g2d.drawRect(nodeX + POINTER_WIDTH + DATA_WIDTH, y, POINTER_WIDTH, NODE_HEIGHT);
-
-                // Desenha o valor
-                FontMetrics fm = g2d.getFontMetrics();
-                g2d.drawString(atual.data, nodeX + POINTER_WIDTH + (DATA_WIDTH - fm.stringWidth(atual.data)) / 2, y + NODE_HEIGHT / 2 + fm.getAscent() / 2);
-
-                // --- Desenho das Setas ---
-                // Seta para PRÓXIMO (em cima)
+                // Setas
                 if (atual.next != null) {
-                    g2d.setColor(Color.BLUE);
-                    int startArrowX = nodeX + POINTER_WIDTH * 2 + DATA_WIDTH;
-                    int endArrowX = startArrowX + H_GAP;
-                    drawArrow(g2d, startArrowX, y + NODE_HEIGHT / 3, endArrowX, y + NODE_HEIGHT / 3);
+                    g2d.setColor(Tema.PRIMARY_DARK);
+                    g2d.drawLine(x + w, y + 10, x + w + gap, y + 10); // Ida
+                    g2d.fillPolygon(new int[]{x + w + gap, x + w + gap - 5, x + w + gap - 5}, new int[]{y + 10, y + 7, y + 13}, 3);
                 }
-
-                // Seta para ANTERIOR (em baixo)
                 if (atual.prev != null) {
-                    g2d.setColor(Color.RED);
-                    int startArrowX = nodeX;
-                    int endArrowX = nodeX - H_GAP;
-                    drawArrow(g2d, startArrowX, y + (NODE_HEIGHT * 2) / 3, endArrowX, y + (NODE_HEIGHT * 2) / 3);
+                    g2d.setColor(Tema.ERROR);
+                    g2d.drawLine(x, y + 30, x - gap, y + 30); // Volta
+                    g2d.fillPolygon(new int[]{x - gap, x - gap + 5, x - gap + 5}, new int[]{y + 30, y + 27, y + 33}, 3);
                 }
-                
-                // Ponteiros Head e Tail
-                if(atual == head) g2d.drawString("HEAD", nodeX + DATA_WIDTH/2, y - 15);
-                if(atual == tail) g2d.drawString("TAIL", nodeX + DATA_WIDTH/2, y + NODE_HEIGHT + 25);
 
+                if (atual == head) {
+                    g2d.drawString("HEAD", x + 25, y - 10);
+                }
+                if (atual == tail) {
+                    g2d.drawString("TAIL", x + 25, y + h + 20);
+                }
 
+                x += w + gap;
                 atual = atual.next;
-                i++;
             }
-        }
-        
-        // Método para desenhar setas
-        private void drawArrow(Graphics2D g, int x1, int y1, int x2, int y2) {
-            g.drawLine(x1, y1, x2, y2);
-            int dx = x2 - x1, dy = y2 - y1;
-            double angle = Math.atan2(dy, dx);
-            int len = (int) Math.sqrt(dx*dx + dy*dy);
-            Polygon arrowHead = new Polygon();
-            arrowHead.addPoint(0, 5);
-            arrowHead.addPoint(0, -5);
-            arrowHead.addPoint(10, 0);
-
-            java.awt.geom.AffineTransform tx = java.awt.geom.AffineTransform.getTranslateInstance(x2, y2);
-            tx.rotate(angle);
-
-            g.setTransform(tx);
-            g.fill(arrowHead);
-            g.setTransform(new java.awt.geom.AffineTransform()); // Reseta a transformação
+            setPreferredSize(new Dimension(x, 200));
+            revalidate();
         }
     }
 }

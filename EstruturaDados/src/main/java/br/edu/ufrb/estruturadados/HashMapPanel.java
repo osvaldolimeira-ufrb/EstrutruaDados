@@ -4,10 +4,6 @@ import java.awt.*;
 import java.util.Random;
 import javax.swing.*;
 
-/**
- *
- * @author kelly
- */
 public class HashMapPanel extends JPanel {
 
     private static final int CAPACIDADE = 15;
@@ -18,49 +14,57 @@ public class HashMapPanel extends JPanel {
     private JTextField campoValor, campoQtdAleatorio;
     private JButton botaoInserir, botaoBuscar, botaoRemover, botaoLimpar, botaoGerar;
     private JLabel labelInfo;
-    private JTextArea textoDefinicao;
 
-    private final Color COR_SUCESSO = new Color(144, 238, 144);
-    private final Color COR_COLISAO = new Color(255, 100, 100);
-    private final Color COR_BUSCA = new Color(173, 216, 230);
+    private final Color COR_SUCESSO = new Color(76, 175, 80);
+    private final Color COR_ERRO = new Color(244, 67, 54);
 
     public HashMapPanel() {
         setLayout(new BorderLayout(10, 10));
-        setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+        setBorder(BorderFactory.createEmptyBorder(15, 15, 15, 15));
+        setBackground(Tema.BACKGROUND);
 
-        // === Painel de Controles (Superior) ===
-        JPanel painelControles = new JPanel(new GridBagLayout());
+        JPanel painelControles = ComponentesUI.criarPainelModerno();
+        painelControles.setLayout(new GridBagLayout());
+        painelControles.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createMatteBorder(0, 0, 2, 0, Tema.BORDER),
+                BorderFactory.createEmptyBorder(15, 20, 15, 20)
+        ));
+
         GridBagConstraints gbc = new GridBagConstraints();
-        gbc.insets = new Insets(5, 5, 5, 5);
+        gbc.insets = new Insets(8, 8, 8, 8);
         gbc.anchor = GridBagConstraints.WEST;
+        gbc.fill = GridBagConstraints.NONE;
+
+        campoValor = ComponentesUI.criarCampoTextoModerno(6);
+        campoQtdAleatorio = ComponentesUI.criarCampoTextoModerno(5);
+        botaoInserir = ComponentesUI.criarBotaoModerno("Inserir", Tema.SUCCESS);
+        botaoLimpar = ComponentesUI.criarBotaoModerno("Limpar tabela", Tema.WARNING);
+        botaoBuscar = ComponentesUI.criarBotaoModerno("Buscar", Tema.SECONDARY);
+        botaoRemover = ComponentesUI.criarBotaoModerno("Remover", Tema.ERROR);
+        botaoGerar = ComponentesUI.criarBotaoModerno("Gerar aleatórios", Tema.PRIMARY);
 
         gbc.gridy = 0;
         gbc.gridx = 0;
-        painelControles.add(new JLabel("Valor (int):"), gbc);
+
+        painelControles.add(ComponentesUI.criarLabelEstilizado("Valor:", "subheading"), gbc);
+
         gbc.gridx = 1;
-        campoValor = new JTextField(5);
         painelControles.add(campoValor, gbc);
         gbc.gridx = 2;
-        botaoInserir = new JButton("Inserir");
         painelControles.add(botaoInserir, gbc);
         gbc.gridx = 3;
-        botaoBuscar = new JButton("Buscar");
         painelControles.add(botaoBuscar, gbc);
         gbc.gridx = 4;
-        botaoRemover = new JButton("Remover");
         painelControles.add(botaoRemover, gbc);
 
         gbc.gridy = 1;
         gbc.gridx = 0;
-        painelControles.add(new JLabel("Qtd. Aleatória:"), gbc);
+        painelControles.add(ComponentesUI.criarLabelEstilizado("Qtd. aleatória:", "subheading"), gbc);
         gbc.gridx = 1;
-        campoQtdAleatorio = new JTextField(5);
         painelControles.add(campoQtdAleatorio, gbc);
         gbc.gridx = 2;
-        botaoGerar = new JButton("Gerar");
         painelControles.add(botaoGerar, gbc);
         gbc.gridx = 3;
-        botaoLimpar = new JButton("Limpar Tabela");
         painelControles.add(botaoLimpar, gbc);
 
         gbc.gridy = 2;
@@ -71,27 +75,16 @@ public class HashMapPanel extends JPanel {
 
         add(painelControles, BorderLayout.NORTH);
 
-        // === Painel de Desenho (Centro) ===
         painelDesenho = new PainelDesenhoHashMap();
-        add(new JScrollPane(painelDesenho, JScrollPane.VERTICAL_SCROLLBAR_NEVER, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED), BorderLayout.CENTER);
+        add(new JScrollPane(painelDesenho), BorderLayout.CENTER);
 
-        // === Painel de Definição (Inferior) ===
-        textoDefinicao = new JTextArea(getDefinicao());
-        textoDefinicao.setEditable(false);
-        textoDefinicao.setFont(new Font("Serif", Font.ITALIC, 14));
-        textoDefinicao.setLineWrap(true);
-        textoDefinicao.setWrapStyleWord(true);
+        JTextArea textoDefinicao = ComponentesUI.criarAreaTextoEstilizada();
+        textoDefinicao.setText(getDefinicao());
+        JScrollPane scrollPane = new JScrollPane(textoDefinicao);
+        scrollPane.setBorder(null);
+        scrollPane.setPreferredSize(new Dimension(Tema.FIELD_WIDTH_CODE, Tema.FIELD_HEIGHT_INFO));
+        add(scrollPane, BorderLayout.SOUTH);
 
-        JScrollPane scrollDescricao = new JScrollPane(textoDefinicao);
-        scrollDescricao.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
-        scrollDescricao.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
-
-        int alturaMaxima = 115;
-        scrollDescricao.setPreferredSize(new Dimension(Integer.MAX_VALUE, alturaMaxima));
-
-        add(scrollDescricao, BorderLayout.SOUTH);
-
-        // === Eventos ===
         botaoInserir.addActionListener(e -> executarAcao("inserir"));
         botaoBuscar.addActionListener(e -> executarAcao("buscar"));
         botaoRemover.addActionListener(e -> executarAcao("remover"));
@@ -125,16 +118,15 @@ public class HashMapPanel extends JPanel {
                     Thread.sleep(500);
 
                     publish(valor + " % " + CAPACIDADE + " = " + index);
-                    painelDesenho.destacar(index, COR_BUSCA);
-                    Thread.sleep(700);
+                    Thread.sleep(800);
 
                     switch (acao) {
                         case "inserir":
                             if (tabelaHash[index] != null) {
-                                painelDesenho.destacar(index, COR_COLISAO);
+                                painelDesenho.destacarTemporario(index, COR_ERRO, 2000);
                                 aviso("COLISÃO! Índice " + index + " já ocupado por " + tabelaHash[index] + ".");
                             } else {
-                                painelDesenho.destacar(index, COR_SUCESSO);
+                                painelDesenho.destacarTemporario(index, COR_SUCESSO, 2000);
                                 aviso("Índice " + index + " livre. Inserindo valor " + valor + ".");
                                 tabelaHash[index] = valor;
                                 tamanhoAtual++;
@@ -142,23 +134,23 @@ public class HashMapPanel extends JPanel {
                             break;
                         case "buscar":
                             if (tabelaHash[index] != null && tabelaHash[index].equals(valor)) {
-                                painelDesenho.destacar(index, COR_SUCESSO);
+                                painelDesenho.destacarTemporario(index, COR_SUCESSO, 2000);
                                 aviso("Valor " + valor + " encontrado no índice " + index + ".");
                             } else {
-                                painelDesenho.destacar(index, COR_COLISAO);
+                                painelDesenho.destacarTemporario(index, COR_ERRO, 2000);
                                 aviso("Valor " + valor + " NÃO encontrado no índice " + index + ".");
                             }
                             break;
                         case "remover":
 
                             if (tabelaHash[index] != null && tabelaHash[index].equals(valor)) {
-                                painelDesenho.destacar(index, COR_SUCESSO);
+                                painelDesenho.destacarTemporario(index, COR_SUCESSO, 2000);
                                 aviso("Valor " + valor + " removido do índice " + index + ".");
                                 tabelaHash[index] = null;
                                 tamanhoAtual--;
                             } else {
-                                painelDesenho.destacar(index, COR_COLISAO);
-                                aviso("Valor " + valor + " NÃO encontrado. Índice " + index + " está vazio.");
+                                painelDesenho.destacarTemporario(index, COR_ERRO, 2000);
+                                aviso("Valor " + valor + " NÃO encontrado.");
                             }
                             break;
                     }
@@ -278,7 +270,7 @@ public class HashMapPanel extends JPanel {
 
         public PainelDesenhoHashMap() {
             setBackground(Color.WHITE);
-            setFont(new Font("SansSerif", Font.BOLD, 14));
+            setBorder(BorderFactory.createLineBorder(Tema.BORDER));
         }
 
         public void atualizar(Integer[] tabelaHash, int capacidade) {
@@ -288,62 +280,79 @@ public class HashMapPanel extends JPanel {
             repaint();
         }
 
-        public void destacar(int index, Color cor) {
+        public void destacarTemporario(int index, Color cor, int msDestaque) {
             this.indexDestaque = index;
             this.corDestaque = cor;
             repaint();
+
+            // remove destaque depois do tempo
+            new Timer(msDestaque, e -> {
+                indexDestaque = -1;
+                repaint();
+            }).start();
         }
 
         @Override
         protected void paintComponent(Graphics g) {
             super.paintComponent(g);
-            if (tabelaHash == null) {
-                return;
-            }
-
-            Graphics2D g2d = (Graphics2D) g.create();
+            Graphics2D g2d = (Graphics2D) g;
             g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-            FontMetrics fm = g2d.getFontMetrics();
 
-            int colunas = 5;
-            int linhas = (int) Math.ceil((double) capacidade / colunas);
-            int bucketWidth = 120;
-            int bucketHeight = 60;
-            int spacingX = 20;
-            int spacingY = 30;
+            int w = 100, h = 60, gap = 20, cols = 5;
+            int startX = (getWidth() - (cols * (w + gap))) / 2;
+            int startY = 40;
 
-            int totalWidth = colunas * (bucketWidth + spacingX) - spacingX;
-            int totalHeight = linhas * (bucketHeight + spacingY) - spacingY;
+            for (int i = 0; i < CAPACIDADE; i++) {
+                int r = i / cols;
+                int c = i % cols;
+                int x = startX + c * (w + gap);
+                int y = startY + r * (h + gap);
 
-            int startX = (getWidth() - totalWidth) / 2;
-            int startY = (getHeight() - totalHeight) / 2;
+                boolean ocupado = tabelaHash[i] != null;
 
-            for (int i = 0; i < capacidade; i++) {
-                int row = i / colunas;
-                int col = i % colunas;
-                int x = startX + col * (bucketWidth + spacingX);
-                int y = startY + row * (bucketHeight + spacingY);
+                Color corFundo;
+                int espessuraBorda;
+                Color corBorda;
 
-                g2d.setColor(i == indexDestaque ? corDestaque : new Color(240, 240, 240));
-                g2d.fillRoundRect(x, y, bucketWidth, bucketHeight, 15, 15);
-                g2d.setColor(Color.BLACK);
-                g2d.drawRoundRect(x, y, bucketWidth, bucketHeight, 15, 15);
+                if (i == indexDestaque) {
+                    corFundo = corDestaque;
+                    espessuraBorda = 4;
+                    corBorda = corDestaque.darker();
+                } else {
+                    corFundo = ocupado ? Tema.PRIMARY_LIGHT : Color.WHITE;
+                    espessuraBorda = 1;
+                    corBorda = Tema.BORDER.darker();
+                }
 
-                String textoIndice = "Índice [" + i + "]";
-                int strWidthIndice = fm.stringWidth(textoIndice);
-                g2d.drawString(textoIndice, x + (bucketWidth - strWidthIndice) / 2, y + 20);
+                // Desenha o fundo do bucket
+                g2d.setColor(corFundo);
+                g2d.fillRoundRect(x, y, w, h, 10, 10);
 
-                if (tabelaHash[i] != null) {
-                    String textoValor = "Valor: " + tabelaHash[i];
-                    g2d.setFont(new Font("SansSerif", Font.PLAIN, 16));
-                    int strWidthValor = g2d.getFontMetrics().stringWidth(textoValor);
-                    g2d.drawString(textoValor, x + (bucketWidth - strWidthValor) / 2, y + 45);
-                    g2d.setFont(new Font("SansSerif", Font.BOLD, 14));
+                // Desenha a borda
+                g2d.setColor(corBorda);
+                g2d.setStroke(new BasicStroke(espessuraBorda));
+                g2d.drawRoundRect(x, y, w, h, 10, 10);
+
+                // Desenha o índice [i]
+                g2d.setColor(Tema.TEXT_SECONDARY);
+                g2d.setFont(Tema.FONT_CODE);
+                g2d.drawString("[" + i + "]", x + 5, y + 20);
+
+                // Desenha o valor armazenado (se houver)
+                if (ocupado) {
+                    g2d.setColor(Tema.TEXT_PRIMARY);
+                    g2d.setFont(Tema.FONT_HEADING);
+                    String v = String.valueOf(tabelaHash[i]);
+
+                    // Centraliza melhor o texto
+                    FontMetrics fm = g2d.getFontMetrics();
+                    int textWidth = fm.stringWidth(v);
+                    int textX = x + (w - textWidth) / 2;
+                    int textY = y + h / 2 + fm.getAscent() / 2;
+
+                    g2d.drawString(v, textX, textY);
                 }
             }
-
-            g2d.dispose();
         }
-
     }
 }

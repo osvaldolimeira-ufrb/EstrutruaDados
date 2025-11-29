@@ -1,16 +1,12 @@
 package br.edu.ufrb.estruturadados;
 
-import javax.swing.*;
 import java.awt.*;
+import javax.swing.*;
 
-/**
- * Implementação da Fila (Queue) FIFO
- * @author OLS
- */
 public class FilaSwingApp extends JPanel {
 
-    // Nó da fila
     private static class Node {
+
         String data;
         Node next;
 
@@ -20,62 +16,56 @@ public class FilaSwingApp extends JPanel {
         }
     }
 
-    // Ponteiros para o INÍCIO (frente) e FIM (traseira) da fila
     private Node front; // INÍCIO da fila (quem será removido)
     private Node rear;  // FIM da fila (onde insere)
-    private int size = 0;
 
-    // Componentes Swing
     private JTextField campoValor;
-    private JButton botaoEnfileirar, botaoDesenfileirar;
+    private JButton botaoEnqueue, botaoDequeue;
     private VisualizacaoPanel painelDesenho;
 
     public FilaSwingApp() {
-        front = null;
-        rear = null;
 
         setLayout(new BorderLayout(10, 10));
-        setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+        setBorder(BorderFactory.createEmptyBorder(15, 15, 15, 15));
+        setBackground(Tema.BACKGROUND);
 
-        JPanel painelControles = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 5));
+        JPanel painelControles = ComponentesUI.criarPainelModerno();
+        painelControles.setLayout(new FlowLayout(FlowLayout.CENTER, 15, 10));
 
-        campoValor = new JTextField(8);
+        campoValor = ComponentesUI.criarCampoTextoModerno(8);
+        botaoEnqueue = ComponentesUI.criarBotaoModerno("ENQUEUE (inserir)", Tema.SUCCESS);
+        botaoDequeue = ComponentesUI.criarBotaoModerno("DEQUEUE (remover)", Tema.ERROR);
 
-        botaoEnfileirar = new JButton("ENQUEUE (Inserir)");
-        botaoDesenfileirar = new JButton("DEQUEUE (Remover)");
-
-        painelControles.add(new JLabel("Valor:"));
+        painelControles.add(ComponentesUI.criarLabelEstilizado("Valor:", "subheading"));
         painelControles.add(campoValor);
-        painelControles.add(botaoEnfileirar);
-        painelControles.add(botaoDesenfileirar);
+        painelControles.add(botaoEnqueue);
+        painelControles.add(botaoDequeue);
 
         add(painelControles, BorderLayout.NORTH);
 
         painelDesenho = new VisualizacaoPanel();
         add(painelDesenho, BorderLayout.CENTER);
 
-        JTextArea textoDefinicao = new JTextArea(getDefinicao());
-        textoDefinicao.setEditable(false);
-        textoDefinicao.setFont(new Font("Serif", Font.ITALIC, 14));
-        textoDefinicao.setLineWrap(true);
-        textoDefinicao.setWrapStyleWord(true);
+        JTextArea textoDefinicao = ComponentesUI.criarAreaTextoEstilizada();
+        textoDefinicao.setText(getDefinicao());
         JScrollPane scrollPane = new JScrollPane(textoDefinicao);
-        scrollPane.setPreferredSize(new Dimension(100, 80));
+        scrollPane.setBorder(null);
+        scrollPane.setPreferredSize(new Dimension(Tema.FIELD_WIDTH_CODE, Tema.FIELD_HEIGHT_INFO));
         add(scrollPane, BorderLayout.SOUTH);
 
-        botaoEnfileirar.addActionListener(e -> enfileirar());
-        botaoDesenfileirar.addActionListener(e -> desenfileirar());
+        botaoEnqueue.addActionListener(e -> enfileirar());
+        botaoDequeue.addActionListener(e -> desenfileirar());
+
     }
 
     private String getDefinicao() {
-        return "FILA (FIFO - First-In, First-Out)\n\n" +
-               "\u2713 Estrutura de dados que organiza elementos seguindo o princípio do 'Primeiro a entrar, Primeiro a sair'\n" +
-               "\u2713 Inserção (ENQUEUE) ocorre no FIM (REAR) e remoção (DEQUEUE) ocorre no INÍCIO (FRONT).\n" +
-               "\u2713 Exemplos práticos: filas de banco, impressão de documentos, atendimento em serviços.";
+        return "FILA (FIFO - First-In, First-Out)\n\n"
+                + "\u2713 Estrutura de dados que organiza elementos seguindo o princípio do 'Primeiro a entrar, Primeiro a sair'\n"
+                + "\u2713 Inserção (ENQUEUE) ocorre no FIM (REAR) e remoção (DEQUEUE) ocorre no INÍCIO (FRONT).\n"
+                + "\u2713 Exemplos práticos: filas de banco, impressão de documentos, atendimento em serviços.";
     }
 
     // --- LÓGICA DA FILA ---
-
     private void enfileirar() {
         String valor = campoValor.getText().trim();
         if (valor.isEmpty()) {
@@ -91,7 +81,7 @@ public class FilaSwingApp extends JPanel {
             rear.next = novoNo;
             rear = novoNo;
         }
-        size++;
+
         campoValor.setText("");
         painelDesenho.repaint();
     }
@@ -104,8 +94,10 @@ public class FilaSwingApp extends JPanel {
 
         String dadoRemovido = front.data;
         front = front.next;
-        if (front == null) rear = null;
-        size--;
+        if (front == null) {
+            rear = null;
+        }
+
         painelDesenho.repaint();
 
         JOptionPane.showMessageDialog(this, "Elemento removido (DEQUEUE): " + dadoRemovido, "Sucesso", JOptionPane.INFORMATION_MESSAGE);
@@ -113,89 +105,71 @@ public class FilaSwingApp extends JPanel {
 
     // --- VISUALIZAÇÃO DA FILA ---
     private class VisualizacaoPanel extends JPanel {
-        private static final int NODE_WIDTH = 100;
-        private static final int NODE_HEIGHT = 40;
-        private static final int H_GAP = 10;
+
+        public VisualizacaoPanel() {
+            setBackground(Color.WHITE);
+            setBorder(BorderFactory.createLineBorder(Tema.BORDER));
+        }
 
         @Override
         protected void paintComponent(Graphics g) {
             super.paintComponent(g);
-
             Graphics2D g2d = (Graphics2D) g;
             g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-            g2d.setFont(new Font("Arial", Font.BOLD, 14));
 
             if (front == null) {
-                g2d.drawString("A fila está vazia.", getWidth() / 2 - 70, getHeight() / 2);
+                g2d.setFont(Tema.FONT_SUBHEADING);
+                g2d.setColor(Tema.TEXT_SECONDARY);
+                g2d.drawString("Fila Vazia.", getWidth() / 2 - 40, getHeight() / 2);
                 return;
             }
 
-            int nodeY = (getHeight() - NODE_HEIGHT) / 2;
-            int x = 20;
+            int nodeWidth = 90;
+            int nodeHeight = 45;
+            int gap = 20;
+            int x = 30;
+            int y = getHeight() / 2 - nodeHeight / 2;
 
             Node atual = front;
             while (atual != null) {
-                // Destaca o INÍCIO (FRONT)
-                if (atual == front) {
-                    g2d.setColor(new Color(255, 230, 153)); // Amarelo claro
-                    g2d.fillRect(x, nodeY, NODE_WIDTH, NODE_HEIGHT);
-                    g2d.setColor(Color.RED);
-                    g2d.setStroke(new BasicStroke(3));
-                    g2d.drawRect(x, nodeY, NODE_WIDTH, NODE_HEIGHT);
-                    g2d.setStroke(new BasicStroke(1));
-                } else {
-                    g2d.setColor(new Color(204, 255, 204)); // Verde claro
-                    g2d.fillRect(x, nodeY, NODE_WIDTH, NODE_HEIGHT);
-                    g2d.setColor(Color.BLACK);
-                    g2d.drawRect(x, nodeY, NODE_WIDTH, NODE_HEIGHT);
+                // Corpo do Nó
+                Color cor = (atual == front) ? Tema.ACCENT : Tema.PRIMARY_LIGHT;
+                if (atual == rear && front != rear) {
+                    cor = Tema.SECONDARY; // Destaque para Rear
                 }
+                g2d.setColor(cor);
+                g2d.fillRoundRect(x, y, nodeWidth, nodeHeight, 10, 10);
 
-                // Valor
+                g2d.setColor(cor.darker());
+                g2d.setStroke(new BasicStroke(1));
+                g2d.drawRoundRect(x, y, nodeWidth, nodeHeight, 10, 10);
+
+                // Texto
+                g2d.setColor(Color.WHITE);
+                g2d.setFont(Tema.FONT_BUTTON);
                 FontMetrics fm = g2d.getFontMetrics();
-                g2d.setColor(Color.BLACK);
-                String data = atual.data;
-                int textX = x + (NODE_WIDTH - fm.stringWidth(data)) / 2;
-                int textY = nodeY + NODE_HEIGHT / 2 + fm.getAscent() / 2;
-                g2d.drawString(data, textX, textY);
+                g2d.drawString(atual.data, x + (nodeWidth - fm.stringWidth(atual.data)) / 2, y + 28);
 
-                // Seta para o próximo
-                if (atual.next != null) {
-                    g2d.setColor(new Color(0, 102, 204));
-                    g2d.setStroke(new BasicStroke(2));
-                    int x_start = x + NODE_WIDTH;
-                    int x_end = x + NODE_WIDTH + H_GAP;
-                    int y_center = nodeY + NODE_HEIGHT / 2;
-                    g2d.drawLine(x_start, y_center, x_end, y_center);
-                    g2d.fillPolygon(new int[]{x_end, x_end - 6, x_end - 6},
-                                    new int[]{y_center, y_center - 6, y_center + 6}, 3);
-                    g2d.setFont(new Font("Arial", Font.PLAIN, 10));
-                    g2d.drawString("next", x_start + 2, y_center - 8);
-                    g2d.setFont(new Font("Arial", Font.BOLD, 14));
-                }
-
-                // Indicação de INÍCIO e FIM
+                g2d.setFont(Tema.FONT_CODE);
+                g2d.setColor(Tema.TEXT_PRIMARY);
                 if (atual == front) {
-                    g2d.setColor(Color.RED);
-                    g2d.drawString("INÍCIO (FRONT)", x, nodeY - 8);
+                    g2d.drawString("Início (FRONT)", x - 4, y - 5);
                 }
                 if (atual == rear) {
-                    g2d.setColor(Color.BLUE);
-                    g2d.drawString("FIM (REAR)", x, nodeY + NODE_HEIGHT + 18);
+                    g2d.drawString("Fim (REAR)", x + 12, y + nodeHeight + 15);
                 }
 
-                x += NODE_WIDTH + H_GAP;
+                // Seta
+                if (atual.next != null) {
+                    g2d.setColor(Tema.TEXT_SECONDARY);
+                    g2d.drawLine(x + nodeWidth, y + nodeHeight / 2, x + nodeWidth + gap, y + nodeHeight / 2);
+                    g2d.fillPolygon(new int[]{x + nodeWidth + gap, x + nodeWidth + gap - 5, x + nodeWidth + gap - 5},
+                            new int[]{y + nodeHeight / 2, y + nodeHeight / 2 - 3, y + nodeHeight / 2 + 3}, 3);
+                }
+
+                x += nodeWidth + gap;
                 atual = atual.next;
             }
         }
-    }
-
-    // --- MÉTODO MAIN ---
-    public static void main(String[] args) {
-        JFrame frame = new JFrame("Fila");
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.add(new FilaSwingApp());
-        frame.setSize(600, 300);
-        frame.setLocationRelativeTo(null);
-        frame.setVisible(true);
     }
 }

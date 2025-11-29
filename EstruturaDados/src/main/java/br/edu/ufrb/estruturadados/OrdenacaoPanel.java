@@ -11,10 +11,6 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import javax.swing.*;
 
-/**
- *
- * @author kelly
- */
 public class OrdenacaoPanel extends JPanel {
 
     private static final int MAX_TAMANHO = 30;
@@ -42,33 +38,36 @@ public class OrdenacaoPanel extends JPanel {
     }
 
     private void configurarInterface() {
-        // Define o layout principal da janela e espaçamento das bordas
         setLayout(new BorderLayout(10, 10));
-        setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+        setBorder(BorderFactory.createEmptyBorder(15, 15, 15, 15));
+        setBackground(Tema.BACKGROUND);
 
-        // =====================================================
-        // PAINEL SUPERIOR: controles (Valor, Tamanho, Velocidade)
-        // =====================================================
-        JPanel painelControles = new JPanel(new GridBagLayout());
+        JPanel painelControles = ComponentesUI.criarPainelModerno();
+        painelControles.setLayout(new GridBagLayout());
+        painelControles.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createMatteBorder(0, 0, 2, 0, Tema.BORDER),
+                BorderFactory.createEmptyBorder(15, 20, 15, 20)
+        ));
+
         GridBagConstraints gbc = new GridBagConstraints();
-        gbc.insets = new Insets(5, 5, 5, 5); // margem entre componentes
-        gbc.anchor = GridBagConstraints.WEST; // alinhamento à esquerda
+        gbc.insets = new Insets(8, 8, 8, 8);
+        gbc.anchor = GridBagConstraints.WEST;
         gbc.fill = GridBagConstraints.NONE;
 
-        // --- Linha 1: Valor e método ---
-        campoEntrada = new JTextField(5);
-        seletorMetodo = new JComboBox<>(algoritmos.keySet().toArray(String[]::new));
-        botaoAdicionar = new JButton("Adicionar");
-        botaoLimpar = new JButton("Limpar");
-        botaoOrdenar = new JButton("Ordenar");
-        botaoPausar = new JButton("Pausar");
+        campoEntrada = ComponentesUI.criarCampoTextoModerno(5);
+        seletorMetodo = ComponentesUI.criarComboBoxModerno(
+                algoritmos.keySet().toArray(String[]::new));
+        botaoAdicionar = ComponentesUI.criarBotaoModerno("Adicionar", Tema.SUCCESS);
+        botaoLimpar = ComponentesUI.criarBotaoModerno("Limpar", Tema.WARNING);
+        botaoOrdenar = ComponentesUI.criarBotaoModerno("Ordenar", Tema.PRIMARY);
+        botaoPausar = ComponentesUI.criarBotaoModerno("Pausar", Tema.INFO);
         botaoLimpar.setEnabled(false);
         botaoOrdenar.setEnabled(false);
         botaoPausar.setEnabled(false);
 
         gbc.gridx = 0;
         gbc.gridy = 0;
-        painelControles.add(new JLabel("Valor:"), gbc);
+        painelControles.add(ComponentesUI.criarLabelEstilizado("Valor:", "subheading"), gbc);
 
         gbc.gridx = 1;
         painelControles.add(campoEntrada, gbc);
@@ -80,7 +79,7 @@ public class OrdenacaoPanel extends JPanel {
         painelControles.add(botaoLimpar, gbc);
 
         gbc.gridx = 4;
-        painelControles.add(new JLabel("Método:"), gbc);
+        painelControles.add(ComponentesUI.criarLabelEstilizado("Método:", "subheading"), gbc);
 
         gbc.gridx = 5;
         painelControles.add(seletorMetodo, gbc);
@@ -91,13 +90,12 @@ public class OrdenacaoPanel extends JPanel {
         gbc.gridx = 7;
         painelControles.add(botaoPausar, gbc);
 
-        // --- Linha 2: Tamanho e botão Aleatório ---
-        campoTamanho = new JTextField(5);
-        botaoAleatorio = new JButton("Gerar Aleatório");
+        campoTamanho = ComponentesUI.criarCampoTextoModerno(5);
+        botaoAleatorio = ComponentesUI.criarBotaoModerno("Gerar aleatório", Tema.SECONDARY);
 
         gbc.gridx = 0;
         gbc.gridy = 1;
-        painelControles.add(new JLabel("Tamanho:"), gbc);
+        painelControles.add(ComponentesUI.criarLabelEstilizado("Tamanho:", "subheading"), gbc);
 
         gbc.gridx = 1;
         painelControles.add(campoTamanho, gbc);
@@ -105,21 +103,22 @@ public class OrdenacaoPanel extends JPanel {
         gbc.gridx = 2;
         painelControles.add(botaoAleatorio, gbc);
 
-        // --- Linha 3: Slider de velocidade ---
-        JLabel labelVel = new JLabel("Velocidade (ms):");
+        JLabel labelVel = ComponentesUI.criarLabelEstilizado("Velocidade (ms):", "subheading");
 
         sliderVelocidade = new JSlider(DELAY_MIN, DELAY_MAX, 750);
         sliderVelocidade.setMajorTickSpacing(250);
         sliderVelocidade.setMinorTickSpacing(50);
         sliderVelocidade.setPaintTicks(true);
         sliderVelocidade.setPaintLabels(true);
+        sliderVelocidade.setBackground(Tema.SURFACE);
+        sliderVelocidade.setFont(Tema.FONT_BODY);
 
         java.util.Hashtable<Integer, JLabel> labelTable = new java.util.Hashtable<>();
         labelTable.put(DELAY_MIN, new JLabel(String.valueOf(DELAY_MIN)));
         labelTable.put(250, new JLabel("250"));
         labelTable.put(500, new JLabel("500"));
         labelTable.put(750, new JLabel("750"));
-        labelTable.put(DELAY_MAX, new JLabel(String.valueOf(DELAY_MAX))); // valor final
+        labelTable.put(DELAY_MAX, new JLabel(String.valueOf(DELAY_MAX)));
         sliderVelocidade.setLabelTable(labelTable);
 
         gbc.gridx = 0;
@@ -130,33 +129,20 @@ public class OrdenacaoPanel extends JPanel {
         gbc.gridwidth = 5;
         gbc.fill = GridBagConstraints.HORIZONTAL;
         painelControles.add(sliderVelocidade, gbc);
-
-        // Adiciona painel de controles no topo
         add(painelControles, BorderLayout.NORTH);
 
-        // =====================================================
-        // PAINEL CENTRAL: área de visualização (gráfico)
-        // =====================================================
         painelDesenho = new PainelVisualizacao();
+        painelDesenho.setBackground(Tema.BACKGROUND);
         add(painelDesenho, BorderLayout.CENTER);
 
-        // =====================================================
-        // PAINEL INFERIOR: texto explicativo do algoritmo
-        // =====================================================
-        textoDefinicao = new JTextArea();
-        textoDefinicao.setEditable(false);
-        textoDefinicao.setFont(new Font("Serif", Font.ITALIC, 14));
-        textoDefinicao.setLineWrap(true);
-        textoDefinicao.setWrapStyleWord(true);
+        textoDefinicao = ComponentesUI.criarAreaTextoEstilizada();
         textoDefinicao.setText(algoritmos.get("Bubble Sort").getDescricao());
 
         JScrollPane scrollDescricao = new JScrollPane(textoDefinicao);
-        scrollDescricao.setPreferredSize(new Dimension(0, 125));
+        scrollDescricao.setBorder(null);
+        scrollDescricao.setPreferredSize(new Dimension(Tema.FIELD_WIDTH_CODE, Tema.FIELD_HEIGHT_INFO));
         add(scrollDescricao, BorderLayout.SOUTH);
 
-        // =====================================================
-        // EVENTOS
-        // =====================================================
         botaoAdicionar.addActionListener(e -> {
             adicionarNumero();
             atualizarEstadoBotoes();
@@ -180,11 +166,15 @@ public class OrdenacaoPanel extends JPanel {
     }
 
     private void atualizarEstadoBotoes() {
-        botaoLimpar.setEnabled(!numeros.isEmpty());
+        boolean ordenando = (worker != null && !worker.isDone());
 
-        botaoOrdenar.setEnabled(numeros.size() > 1 && !estaOrdenado());
-
-        botaoAdicionar.setEnabled(numeros.size() < MAX_TAMANHO);
+        botaoAdicionar.setEnabled(!ordenando && numeros.size() < MAX_TAMANHO);
+        botaoLimpar.setEnabled(!ordenando && !numeros.isEmpty());
+        botaoAleatorio.setEnabled(!ordenando);
+        botaoOrdenar.setEnabled(!ordenando && numeros.size() > 1 && !estaOrdenado());
+        seletorMetodo.setEnabled(!ordenando);
+        campoEntrada.setEnabled(!ordenando);
+        campoTamanho.setEnabled(!ordenando);
     }
 
     private void adicionarNumero() {

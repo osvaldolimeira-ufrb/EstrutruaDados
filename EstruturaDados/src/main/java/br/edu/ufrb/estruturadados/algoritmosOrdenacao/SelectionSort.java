@@ -3,10 +3,6 @@ package br.edu.ufrb.estruturadados.algoritmosOrdenacao;
 import java.util.List;
 import java.util.function.BiConsumer;
 
-/**
- *
- * @author kelly
- */
 public class SelectionSort implements SortAlgorithm {
 
     @Override

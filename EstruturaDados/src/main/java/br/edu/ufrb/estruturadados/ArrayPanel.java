@@ -1,71 +1,62 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package br.edu.ufrb.estruturadados;
 
-import javax.swing.*;
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
+import javax.swing.*;
 
-/**
- *
- * @author 2401210
- */
 public class ArrayPanel extends JPanel {
-     private List<String> array;
+
+    private List<String> array;
     private JTextField campoDeEntrada;
     private JButton botaoAdicionar, botaoRemover;
     private VisualizacaoPanel painelDesenho;
 
     public ArrayPanel() {
-        // Inicializa a estrutura de dados interna
         array = new ArrayList<>();
 
-        // Layout principal deste painel
         setLayout(new BorderLayout(10, 10));
-        setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+        setBorder(BorderFactory.createEmptyBorder(15, 15, 15, 15));
+        setBackground(Tema.BACKGROUND);
 
-        // --- Painel de Controles ---
-        JPanel painelControles = new JPanel();
-        campoDeEntrada = new JTextField(10);
-        botaoAdicionar = new JButton("Adicionar");
-        botaoRemover = new JButton("Remover (por índice)");
+        JPanel painelControles = ComponentesUI.criarPainelModerno();
+        painelControles.setLayout(new FlowLayout(FlowLayout.LEFT, 15, 15));
+        painelControles.setBorder(BorderFactory.createEmptyBorder(15, 15, 15, 15));
 
-        painelControles.add(new JLabel("Valor:"));
+        JLabel label = ComponentesUI.criarLabelEstilizado("Valor:", "subheading");
+        painelControles.add(label);
+
+        campoDeEntrada = ComponentesUI.criarCampoTextoModerno(10);
+        botaoAdicionar = ComponentesUI.criarBotaoModerno("Adicionar", Tema.SUCCESS);
+        botaoRemover = ComponentesUI.criarBotaoModerno("Remover (por índice)", Tema.ERROR);
+
         painelControles.add(campoDeEntrada);
         painelControles.add(botaoAdicionar);
         painelControles.add(botaoRemover);
-        
         add(painelControles, BorderLayout.NORTH);
 
-        // --- Painel de Visualização ---
         painelDesenho = new VisualizacaoPanel();
+        painelDesenho.setBackground(Tema.BACKGROUND);
         add(painelDesenho, BorderLayout.CENTER);
 
-        // --- Painel de Texto de Definição ---
-        JTextArea textoDefinicao = new JTextArea();
-        textoDefinicao.setEditable(false);
-        textoDefinicao.setFont(new Font("Serif", Font.ITALIC, 14));
-        textoDefinicao.setLineWrap(true);
-        textoDefinicao.setWrapStyleWord(true);
+        JTextArea textoDefinicao = ComponentesUI.criarAreaTextoEstilizada();
         textoDefinicao.setText(getDefinicao());
+
         JScrollPane scrollPane = new JScrollPane(textoDefinicao);
-        scrollPane.setPreferredSize(new Dimension(100, 100)); // Altura do painel
+        scrollPane.setBorder(null);
+        scrollPane.setPreferredSize(new Dimension(Tema.FIELD_WIDTH_CODE, Tema.FIELD_HEIGHT_INFO));
         add(scrollPane, BorderLayout.SOUTH);
 
-        // --- Lógica dos Botões (Listeners) ---
         botaoAdicionar.addActionListener(e -> adicionarElemento());
         botaoRemover.addActionListener(e -> removerElemento());
     }
-    
+
     private String getDefinicao() {
-        return "ARRAY (ou Lista Dinâmica):\n\n" +
-               "É uma coleção de itens armazenados em locais de memória contíguos. " +
-               "Os elementos podem ser acessados diretamente usando um índice numérico.\n" +
-               "Prós: Acesso rápido aos elementos (O(1)).\n" +
-               "Contras: A inserção ou remoção de elementos no meio da lista pode ser lenta (O(n)), pois exige o deslocamento de outros elementos.";
+        return "ARRAY (ou Lista Dinâmica):\n\n"
+                + "É uma coleção de itens armazenados em locais de memória contíguos. "
+                + "Os elementos podem ser acessados diretamente usando um índice numérico.\n"
+                + "Prós: Acesso rápido aos elementos (O(1)).\n"
+                + "Contras: A inserção ou remoção de elementos no meio da lista pode ser lenta (O(n)), pois exige o deslocamento de outros elementos.";
     }
 
     private void adicionarElemento() {
@@ -73,7 +64,7 @@ public class ArrayPanel extends JPanel {
         if (!valor.isEmpty()) {
             array.add(valor);
             campoDeEntrada.setText("");
-            painelDesenho.repaint(); // Manda o painel se redesenhar
+            painelDesenho.repaint();
         } else {
             JOptionPane.showMessageDialog(this, "Por favor, insira um valor.", "Erro", JOptionPane.ERROR_MESSAGE);
         }
@@ -95,38 +86,89 @@ public class ArrayPanel extends JPanel {
         }
     }
 
-    // Classe interna para cuidar do desenho
+    // Classe para gerenciar o desenho
     private class VisualizacaoPanel extends JPanel {
+
+        public VisualizacaoPanel() {
+            setBackground(Color.WHITE);
+            setBorder(BorderFactory.createLineBorder(Tema.BORDER));
+        }
+
         @Override
         protected void paintComponent(Graphics g) {
             super.paintComponent(g);
             Graphics2D g2d = (Graphics2D) g;
             g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
-            int boxWidth = 60;
-            int boxHeight = 40;
-            int startX = 20;
-            int y = 50;
+            if (array.isEmpty()) {
+                g2d.setColor(Tema.TEXT_SECONDARY);
+                g2d.setFont(Tema.FONT_SUBHEADING);
+                String msg = "Array vazio. Adicione elementos para visualizar.";
+                FontMetrics fm = g2d.getFontMetrics();
+                int x = (getWidth() - fm.stringWidth(msg)) / 2;
+                int y = getHeight() / 2;
+                g2d.drawString(msg, x, y);
+                return;
+            }
+
+            int boxWidth = 70;
+            int boxHeight = 50;
+            int startX = 30;
+            int y = 60;
+            int espacamento = 15;
+
+            // Centraliza o array horizontalmente
+            int totalWidth = array.size() * boxWidth + (array.size() - 1) * espacamento;
+            if (totalWidth < getWidth() - 60) {
+                startX = (getWidth() - totalWidth) / 2;
+            }
 
             for (int i = 0; i < array.size(); i++) {
-                int x = startX + i * (boxWidth + 10);
+                int x = startX + i * (boxWidth + espacamento);
 
-                // Desenha a caixa
-                g2d.setColor(Color.CYAN);
-                g2d.fillRect(x, y, boxWidth, boxHeight);
-                g2d.setColor(Color.BLACK);
-                g2d.drawRect(x, y, boxWidth, boxHeight);
+                // Gradiente para as caixas
+                GradientPaint gradient = new GradientPaint(
+                        x, y, Tema.ARRAY_BOX,
+                        x, y + boxHeight, Tema.ARRAY_BOX.darker(),
+                        false
+                );
+                g2d.setPaint(gradient);
+                g2d.fillRoundRect(x, y, boxWidth, boxHeight, 10, 10);
 
-                // Desenha o valor dentro da caixa
+                // Sombra
+                g2d.setColor(Tema.comTransparencia(Color.BLACK, 25));
+                g2d.fillRoundRect(x + 2, y + 2, boxWidth, boxHeight, 10, 10);
+
+                // Borda destacada
+                g2d.setColor(Tema.ARRAY_BORDER);
+                g2d.setStroke(new BasicStroke(2));
+                g2d.drawRoundRect(x, y, boxWidth, boxHeight, 10, 10);
+
+                // Texto com sombra para legibilidade
                 String valor = array.get(i);
+                g2d.setFont(Tema.FONT_BUTTON);
                 FontMetrics fm = g2d.getFontMetrics();
                 int stringWidth = fm.stringWidth(valor);
-                g2d.drawString(valor, x + (boxWidth - stringWidth) / 2, y + boxHeight / 2 + fm.getAscent() / 2);
 
-                // Desenha o índice abaixo da caixa
+                // Sombra do texto
+                g2d.setColor(Tema.comTransparencia(Color.BLACK, 150));
+                g2d.drawString(valor,
+                        x + (boxWidth - stringWidth) / 2 + 1,
+                        y + boxHeight / 2 + fm.getAscent() / 2 + 1);
+
+                // Texto principal branco
+                g2d.setColor(Color.WHITE);
+                g2d.drawString(valor,
+                        x + (boxWidth - stringWidth) / 2,
+                        y + boxHeight / 2 + fm.getAscent() / 2);
+
                 String indiceStr = String.valueOf(i);
-                int indexStringWidth = fm.stringWidth(indiceStr);
-                g2d.drawString(indiceStr, x + (boxWidth - indexStringWidth) / 2, y + boxHeight + 20);
+                g2d.setColor(Tema.TEXT_SECONDARY);
+                g2d.setFont(Tema.FONT_BODY);
+                int indexStringWidth = g2d.getFontMetrics().stringWidth(indiceStr);
+                g2d.drawString(indiceStr,
+                        x + (boxWidth - indexStringWidth) / 2,
+                        y + boxHeight + 25);
             }
         }
     }

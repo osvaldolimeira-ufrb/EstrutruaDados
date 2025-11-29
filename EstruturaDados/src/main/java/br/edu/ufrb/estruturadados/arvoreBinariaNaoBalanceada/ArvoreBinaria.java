@@ -3,14 +3,10 @@ package br.edu.ufrb.estruturadados.arvoreBinariaNaoBalanceada;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- *
- * @author kelly
- */
-
 public class ArvoreBinaria {
 
     public static class No {
+
         public int valor;
         public No esquerda, direita;
 
@@ -50,8 +46,12 @@ public class ArvoreBinaria {
     }
 
     private boolean buscarRec(No atual, int valor) {
-        if (atual == null) return false;
-        if (atual.valor == valor) return true;
+        if (atual == null) {
+            return false;
+        }
+        if (atual.valor == valor) {
+            return true;
+        }
         return valor < atual.valor
                 ? buscarRec(atual.esquerda, valor)
                 : buscarRec(atual.direita, valor);
@@ -66,16 +66,21 @@ public class ArvoreBinaria {
     }
 
     private No removerRec(No atual, int valor) {
-        if (atual == null) return null;
+        if (atual == null) {
+            return null;
+        }
 
         if (valor < atual.valor) {
             atual.esquerda = removerRec(atual.esquerda, valor);
         } else if (valor > atual.valor) {
             atual.direita = removerRec(atual.direita, valor);
         } else {
-            if (atual.esquerda == null) return atual.direita;
-            else if (atual.direita == null) return atual.esquerda;
-            
+            if (atual.esquerda == null) {
+                return atual.direita;
+            } else if (atual.direita == null) {
+                return atual.esquerda;
+            }
+
             atual.valor = menorValor(atual.direita);
             atual.direita = removerRec(atual.direita, atual.valor);
         }
@@ -138,7 +143,9 @@ public class ArvoreBinaria {
     }
 
     private int calcularAltura(No no) {
-        if (no == null) return -1;
+        if (no == null) {
+            return -1;
+        }
         return 1 + Math.max(calcularAltura(no.esquerda), calcularAltura(no.direita));
     }
 
@@ -147,7 +154,9 @@ public class ArvoreBinaria {
     }
 
     private int contarNos(No no) {
-        if (no == null) return 0;
+        if (no == null) {
+            return 0;
+        }
         return 1 + contarNos(no.esquerda) + contarNos(no.direita);
     }
 
@@ -156,8 +165,12 @@ public class ArvoreBinaria {
     }
 
     private int contarFolhas(No no) {
-        if (no == null) return 0;
-        if (no.esquerda == null && no.direita == null) return 1;
+        if (no == null) {
+            return 0;
+        }
+        if (no.esquerda == null && no.direita == null) {
+            return 1;
+        }
         return contarFolhas(no.esquerda) + contarFolhas(no.direita);
     }
 }

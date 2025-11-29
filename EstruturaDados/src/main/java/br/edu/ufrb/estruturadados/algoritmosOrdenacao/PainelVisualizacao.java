@@ -1,14 +1,16 @@
 package br.edu.ufrb.estruturadados.algoritmosOrdenacao;
 
+import br.edu.ufrb.estruturadados.Tema;
 import java.awt.*;
 import java.util.List;
 import javax.swing.*;
 
-/**
- *
- * @author kelly
- */
 public class PainelVisualizacao extends JPanel {
+
+    public PainelVisualizacao() {
+        setBackground(Color.WHITE);
+        setBorder(BorderFactory.createLineBorder(Tema.BORDER));
+    }
 
     private List<Integer> numeros;
     private int indiceA = -1, indiceB = -1;
@@ -30,8 +32,9 @@ public class PainelVisualizacao extends JPanel {
 
         if (numeros == null || numeros.isEmpty()) {
             Graphics2D g2 = (Graphics2D) g;
-            g2.setColor(Color.GRAY);
-            g2.setFont(new Font("SansSerif", Font.BOLD, 18));
+            g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+            g2.setColor(Tema.TEXT_SECONDARY);
+            g2.setFont(Tema.FONT_SUBHEADING);
 
             String msg = "A lista está vazia! Adicione ou gere valores para iniciar a visualização.";
             FontMetrics fm = g2.getFontMetrics();
@@ -46,16 +49,16 @@ public class PainelVisualizacao extends JPanel {
 
         int width = getWidth();
         int height = getHeight();
-        int baseY = height - 40;
+        int baseY = height - 50;
         int n = numeros.size();
 
         // Configurações de layout
         int margem = 30;
-        int espacoEntreBarras = 5;
+        int espacoEntreBarras = 6;
 
         // Calcula a largura das barras considerando os espaços entre elas
         int larguraDisponivel = width - 2 * margem - (n - 1) * espacoEntreBarras;
-        int barWidth = Math.max(15, larguraDisponivel / n);
+        int barWidth = Math.max(18, larguraDisponivel / n);
 
         // Centraliza o gráfico horizontalmente
         int totalWidth = n * barWidth + (n - 1) * espacoEntreBarras;
@@ -63,7 +66,7 @@ public class PainelVisualizacao extends JPanel {
 
         // Calcula escala de altura
         int maxValor = numeros.stream().max(Integer::compareTo).orElse(1);
-        double escala = (double) (height - 100) / maxValor;
+        double escala = (double) (height - 120) / maxValor;
 
         for (int i = 0; i < n; i++) {
             int valor = numeros.get(i);
@@ -71,24 +74,39 @@ public class PainelVisualizacao extends JPanel {
             int x = inicioX + i * (barWidth + espacoEntreBarras);
             int y = baseY - altura;
 
-            // Cores de destaque
+            // Cores baseadas no estado
+            Color corBarra;
             if (i == indiceA) {
-                g2d.setColor(Color.RED);
+                corBarra = Tema.SORT_BAR_COMPARING;
             } else if (i == indiceB) {
-                g2d.setColor(Color.GREEN);
+                corBarra = Tema.ERROR;
             } else {
-                g2d.setColor(new Color(255, 140, 0));
+                corBarra = Tema.SORT_BAR_DEFAULT;
             }
 
-            // Desenha a barra
-            g2d.fillRect(x, y, barWidth, altura);
-            g2d.setColor(Color.BLACK);
-            g2d.drawRect(x, y, barWidth, altura);
+            // Gradiente para a barra
+            GradientPaint barGradient = new GradientPaint(
+                    x, y, corBarra,
+                    x, y + altura, corBarra.darker(),
+                    false
+            );
+            g2d.setPaint(barGradient);
+            g2d.fillRoundRect(x, y, barWidth, altura, 5, 5);
 
-            // Desenha o valor abaixo
+            // Sombra para profundidade
+            g2d.setColor(Tema.comTransparencia(Color.BLACK, 20));
+            g2d.fillRoundRect(x + 1, y + 1, barWidth, altura, 5, 5);
+
+            // Borda destacada
+            g2d.setColor(corBarra.darker());
+            g2d.setStroke(new BasicStroke(1.5f));
+            g2d.drawRoundRect(x, y, barWidth, altura, 5, 5);
+
             String texto = String.valueOf(valor);
+            g2d.setColor(Tema.TEXT_PRIMARY);
+            g2d.setFont(Tema.FONT_BODY);
             int strWidth = g2d.getFontMetrics().stringWidth(texto);
-            g2d.drawString(texto, x + (barWidth - strWidth) / 2, baseY + 15);
+            g2d.drawString(texto, x + (barWidth - strWidth) / 2, baseY + 18);
         }
 
         g2d.dispose();

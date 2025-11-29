@@ -1,17 +1,17 @@
 package br.edu.ufrb.estruturadados;
+
 import br.edu.ufrb.estruturadados.arvoreBinariaNaoBalanceada.ArvoreBinaria;
 import br.edu.ufrb.estruturadados.arvoreBinariaNaoBalanceada.PainelDesenhoArvore;
 import java.awt.*;
+import java.awt.event.MouseListener;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 import javax.swing.*;
 
-/**
- *
- * @author kelly
- */
 public class ArvoreBinariaNaoBalanceadaPanel extends JPanel {
 
     private static final int MAX_NODES = 20;
@@ -22,42 +22,84 @@ public class ArvoreBinariaNaoBalanceadaPanel extends JPanel {
     private JButton botaoEmOrdem, botaoPreOrdem, botaoPosOrdem;
     private PainelDesenhoArvore painelDesenho;
     private JLabel labelAltura, labelNos, labelFolhas;
-    private JTextArea textoDefinicao;
-    private JScrollPane scrollPaneDesenho;
+    private JPanel painelControles;
 
     private SwingWorker<Void, ArvoreBinaria.No> workerAtivo;
+    private final Map<JButton, Color> coresOriginais = new HashMap<>();
+    private final Map<JButton, MouseListener[]> mouseListenersOriginais = new HashMap<>();
 
     public ArvoreBinariaNaoBalanceadaPanel() {
         setLayout(new BorderLayout(10, 10));
-        setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+        setBorder(BorderFactory.createEmptyBorder(15, 15, 15, 15));
+        setBackground(Tema.BACKGROUND);
 
-        // === Painel Superior: Controles ===
-        JPanel painelControles = new JPanel(new GridBagLayout());
+        painelControles = ComponentesUI.criarPainelModerno();
+        painelControles.setLayout(new GridBagLayout());
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.insets = new Insets(5, 5, 5, 5);
         gbc.anchor = GridBagConstraints.WEST;
 
-        // --- Linha 1: Controles Principais ---
-        gbc.gridy = 0;
-        gbc.gridx = 0; painelControles.add(new JLabel("Valor:"), gbc);
-        gbc.gridx = 1; campoValor = new JTextField(5); painelControles.add(campoValor, gbc);
-        gbc.gridx = 2; botaoInserir = new JButton("Inserir"); painelControles.add(botaoInserir, gbc);
-        gbc.gridx = 3; botaoRemover = new JButton("Remover"); painelControles.add(botaoRemover, gbc);
-        gbc.gridx = 4; botaoBuscar = new JButton("Buscar"); painelControles.add(botaoBuscar, gbc);
-        gbc.gridx = 5; botaoLimpar = new JButton("Limpar"); painelControles.add(botaoLimpar, gbc);
+        campoValor = ComponentesUI.criarCampoTextoModerno(8);
+        botaoInserir = ComponentesUI.criarBotaoModerno("Inserir", Tema.SUCCESS);
+        botaoRemover = ComponentesUI.criarBotaoModerno("Remover", Tema.ERROR);
+        botaoBuscar = ComponentesUI.criarBotaoModerno("Buscar", Tema.WARNING);
+        botaoLimpar = ComponentesUI.criarBotaoModerno("Limpar", Tema.WARNING);
+        botaoGerar = ComponentesUI.criarBotaoModerno("Gerar árvore", Tema.SECONDARY);
+        botaoEmOrdem = ComponentesUI.criarBotaoModerno("Em ordem", Tema.PRIMARY);
+        botaoPreOrdem = ComponentesUI.criarBotaoModerno("Pré-ordem", Tema.PRIMARY);
+        botaoPosOrdem = ComponentesUI.criarBotaoModerno("Pós-ordem", Tema.PRIMARY);
 
-        // --- Linha 2: Geração e Percursos ---
+        List<JButton> botoes = List.of(
+                botaoInserir, botaoRemover, botaoBuscar, botaoLimpar, botaoGerar,
+                botaoEmOrdem, botaoPreOrdem, botaoPosOrdem
+        );
+
+        for (JButton btn : botoes) {
+            coresOriginais.put(btn, btn.getBackground());
+            mouseListenersOriginais.put(btn, btn.getMouseListeners());
+            btn.setOpaque(true);
+            btn.setBorderPainted(true);
+            btn.setContentAreaFilled(true);
+
+            if (btn instanceof AbstractButton) {
+                ((AbstractButton) btn).setRolloverEnabled(true);
+            }
+        }
+
+        gbc.gridy = 0;
+        gbc.gridx = 0;
+
+        painelControles.add(ComponentesUI.criarLabelEstilizado("Valor:", "subheading"), gbc);
+        gbc.gridx = 1;
+        painelControles.add(campoValor, gbc);
+        gbc.gridx = 2;
+        painelControles.add(botaoInserir, gbc);
+        gbc.gridx = 3;
+        painelControles.add(botaoRemover, gbc);
+        gbc.gridx = 4;
+        painelControles.add(botaoBuscar, gbc);
+        gbc.gridx = 5;
+        painelControles.add(botaoLimpar, gbc);
+
         gbc.gridy = 1;
-        gbc.gridx = 0; painelControles.add(new JLabel("Número de nós:"), gbc);
-        gbc.gridx = 1; campoQtdNos = new JTextField(5); painelControles.add(campoQtdNos, gbc);
-        gbc.gridx = 2; botaoGerar = new JButton("Gerar Árvore"); painelControles.add(botaoGerar, gbc);
-        gbc.gridx = 3; botaoEmOrdem = new JButton("Em Ordem"); painelControles.add(botaoEmOrdem, gbc);
-        gbc.gridx = 4; botaoPreOrdem = new JButton("Pré-Ordem"); painelControles.add(botaoPreOrdem, gbc);
-        gbc.gridx = 5; botaoPosOrdem = new JButton("Pós-Ordem"); painelControles.add(botaoPosOrdem, gbc);
-        
-        // --- Linha 3: Métricas ---
+        gbc.gridx = 0;
+        painelControles.add(ComponentesUI.criarLabelEstilizado("Número de nós:", "subheading"), gbc);
+        gbc.gridx = 1;
+        campoQtdNos = ComponentesUI.criarCampoTextoModerno(5);
+        painelControles.add(campoQtdNos, gbc);
+        gbc.gridx = 2;
+        painelControles.add(botaoGerar, gbc);
+        gbc.gridx = 3;
+        painelControles.add(botaoEmOrdem, gbc);
+        gbc.gridx = 4;
+        painelControles.add(botaoPreOrdem, gbc);
+        gbc.gridx = 5;
+        painelControles.add(botaoPosOrdem, gbc);
+
         gbc.gridy = 2;
-        gbc.gridx = 0; gbc.gridwidth=6; gbc.anchor = GridBagConstraints.CENTER;
+        gbc.gridx = 0;
+        gbc.gridwidth = 6;
+        gbc.anchor = GridBagConstraints.CENTER;
         JPanel painelMetricas = new JPanel(new FlowLayout(FlowLayout.CENTER, 20, 5));
         labelAltura = new JLabel("Altura: -1");
         labelNos = new JLabel("Nós: 0");
@@ -66,25 +108,19 @@ public class ArvoreBinariaNaoBalanceadaPanel extends JPanel {
         painelMetricas.add(labelNos);
         painelMetricas.add(labelFolhas);
         painelControles.add(painelMetricas, gbc);
-        
+
         add(painelControles, BorderLayout.NORTH);
 
-        // === Painel Central: Desenho da Árvore (com Scroll) ===
         painelDesenho = new PainelDesenhoArvore(arvore);
-        scrollPaneDesenho = new JScrollPane(painelDesenho);
-        add(scrollPaneDesenho, BorderLayout.CENTER);
+        add(new JScrollPane(painelDesenho), BorderLayout.CENTER);
 
-        // === Painel Inferior: Definição ===
-        textoDefinicao = new JTextArea(getDefinicao());
-        textoDefinicao.setEditable(false);
-        textoDefinicao.setFont(new Font("Serif", Font.ITALIC, 14));
-        textoDefinicao.setLineWrap(true);
-        textoDefinicao.setWrapStyleWord(true);
-        JScrollPane scrollDefinicao = new JScrollPane(textoDefinicao);
-        scrollDefinicao.setPreferredSize(new Dimension(0, 100));
-        add(scrollDefinicao, BorderLayout.SOUTH);
+        JTextArea textoDefinicao = ComponentesUI.criarAreaTextoEstilizada();
+        textoDefinicao.setText(getDefinicao());
+        JScrollPane scrollPane = new JScrollPane(textoDefinicao);
+        scrollPane.setBorder(null);
+        scrollPane.setPreferredSize(new Dimension(Tema.FIELD_WIDTH_CODE, Tema.FIELD_HEIGHT_INFO));
+        add(scrollPane, BorderLayout.SOUTH);
 
-        // === Eventos ===
         botaoInserir.addActionListener(e -> inserirValor());
         botaoRemover.addActionListener(e -> removerValor());
         botaoBuscar.addActionListener(e -> buscarValor());
@@ -96,27 +132,74 @@ public class ArvoreBinariaNaoBalanceadaPanel extends JPanel {
 
         atualizarInterfaceCompleta();
     }
-    
+
     private void bloquearControles(boolean bloquear) {
-        // Bloqueia todos os controles durante uma animação
-        Component[] componentes = ((JPanel)getComponent(0)).getComponents();
+
+        Component[] componentes = ((JPanel) getComponent(0)).getComponents();
+
         for (Component comp : componentes) {
-             if (comp instanceof JPanel) { // para painel de metricas
-                 for(Component compInterno : ((JPanel) comp).getComponents()){
-                    compInterno.setEnabled(!bloquear);
-                 }
-             }
-             comp.setEnabled(!bloquear);
+            comp.setEnabled(!bloquear);
+
+            if (comp instanceof JPanel sub) {
+                for (Component interno : sub.getComponents()) {
+                    interno.setEnabled(!bloquear);
+                    desabilitarHoverGlobal(bloquear);
+                }
+            }
         }
-        
-        if (!bloquear) {
-            atualizarEstadoBotoes();
+        for (JButton btn : coresOriginais.keySet()) {
+            atualizarEstiloDisabled(btn, bloquear);
         }
+
+        painelControles.repaint();
+    }
+
+    private void desabilitarHoverGlobal(boolean disabled) {
+        for (JButton btn : coresOriginais.keySet()) {
+            atualizarEstiloDisabled(btn, disabled);
+        }
+    }
+
+    private void atualizarEstiloDisabled(JButton btn, boolean disabled) {
+        btn.setEnabled(!disabled);
+        if (disabled) {
+            Color orig = coresOriginais.getOrDefault(btn, btn.getBackground());
+            btn.setBackground(orig.darker());
+            btn.setCursor(Cursor.getDefaultCursor());
+            btn.setFocusable(false);
+            btn.setBorderPainted(false);
+            btn.setContentAreaFilled(false);
+
+            for (MouseListener ml : btn.getMouseListeners()) {
+                btn.removeMouseListener(ml);
+            }
+
+            if (btn instanceof AbstractButton) {
+                ((AbstractButton) btn).setRolloverEnabled(false);
+            }
+        } else {
+            Color orig = coresOriginais.getOrDefault(btn, btn.getBackground());
+            btn.setBackground(orig);
+            btn.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+            btn.setFocusable(true);
+            btn.setBorderPainted(true);
+            btn.setContentAreaFilled(true);
+            MouseListener[] origListeners = mouseListenersOriginais.get(btn);
+            if (origListeners != null) {
+                for (MouseListener ml : origListeners) {
+                    btn.addMouseListener(ml);
+                }
+            }
+            if (btn instanceof AbstractButton) {
+                ((AbstractButton) btn).setRolloverEnabled(true);
+            }
+        }
+        btn.repaint();
     }
 
     private void atualizarEstadoBotoes() {
         boolean arvoreCheia = arvore.getNumeroNos() >= MAX_NODES;
-        botaoInserir.setEnabled(!arvoreCheia);
+        atualizarEstiloDisabled(botaoInserir, arvoreCheia);
     }
 
     private void atualizarInterfaceCompleta() {
@@ -183,7 +266,7 @@ public class ArvoreBinariaNaoBalanceadaPanel extends JPanel {
             limparArvore();
             Random rand = new Random();
             Set<Integer> valores = new HashSet<>();
-            while(valores.size() < qtd) {
+            while (valores.size() < qtd) {
                 valores.add(rand.nextInt(200));
             }
             for (Integer valor : valores) {
@@ -207,9 +290,13 @@ public class ArvoreBinariaNaoBalanceadaPanel extends JPanel {
                     while (atual != null) {
                         publish(atual);
                         Thread.sleep(500);
-                        if (valorBusca < atual.valor) atual = atual.esquerda;
-                        else if (valorBusca > atual.valor) atual = atual.direita;
-                        else break;
+                        if (valorBusca < atual.valor) {
+                            atual = atual.esquerda;
+                        } else if (valorBusca > atual.valor) {
+                            atual = atual.direita;
+                        } else {
+                            break;
+                        }
                     }
                     return null;
                 }
@@ -222,8 +309,11 @@ public class ArvoreBinariaNaoBalanceadaPanel extends JPanel {
                 @Override
                 protected void done() {
                     boolean encontrado = arvore.buscar(valorBusca);
-                    if (encontrado) aviso("Valor " + valorBusca + " encontrado!");
-                    else erro("Valor " + valorBusca + " não encontrado.");
+                    if (encontrado) {
+                        aviso("Valor " + valorBusca + " encontrado!");
+                    } else {
+                        erro("Valor " + valorBusca + " não encontrado.");
+                    }
                     painelDesenho.destacarNo(null, true);
                     bloquearControles(false);
                 }
@@ -235,18 +325,18 @@ public class ArvoreBinariaNaoBalanceadaPanel extends JPanel {
             bloquearControles(false);
         }
     }
-    
+
     private void animarPercurso(List<ArvoreBinaria.No> percurso) {
-        if(percurso.isEmpty()) {
+        if (percurso.isEmpty()) {
             aviso("A árvore está vazia.");
             return;
         }
-        
+
         bloquearControles(true);
         workerAtivo = new SwingWorker<>() {
             @Override
             protected Void doInBackground() throws Exception {
-                for(ArvoreBinaria.No no : percurso) {
+                for (ArvoreBinaria.No no : percurso) {
                     publish(no);
                     Thread.sleep(500);
                 }
@@ -269,17 +359,17 @@ public class ArvoreBinariaNaoBalanceadaPanel extends JPanel {
     }
 
     private String getDefinicao() {
-    return "ÁRVORE BINÁRIA DE BUSCA (NÃO BALANCEADA):\n\n" +
-            "É uma estrutura de dados hierárquica em que cada nó possui um valor e, no máximo, dois filhos: " +
-            "um à esquerda e outro à direita. Todos os valores na subárvore esquerda são menores que o valor do nó, " +
-            "e todos os valores na subárvore direita são maiores, mantendo assim uma ordenação natural entre os elementos. Nesta versão não balanceada, não há mecanismos para redistribuir automaticamente os nós, " +
-            "o que pode levar a uma estrutura assimétrica dependendo da ordem de inserção.\n\n" +
-            "Prós: Estrutura simples de implementar e entender. Mantém os elementos sempre ordenados e permite percursos em ordem (in-order) " +
-            "que retornam os valores em sequência crescente.\n\n" +
-            "Contras: Pode se tornar desbalanceada e perder eficiência, degradando para O(n) em operações de busca, inserção e remoção " +
-            "quando os dados são inseridos de forma sequencial.\n\n" +
-            "Complexidade: Busca, inserção e remoção — melhor caso O(log n), caso médio O(log n), pior caso O(n).";
-}
+        return "ÁRVORE BINÁRIA DE BUSCA (NÃO BALANCEADA):\n\n"
+                + "É uma estrutura de dados hierárquica em que cada nó possui um valor e, no máximo, dois filhos: "
+                + "um à esquerda e outro à direita. Todos os valores na subárvore esquerda são menores que o valor do nó, "
+                + "e todos os valores na subárvore direita são maiores, mantendo assim uma ordenação natural entre os elementos. Nesta versão não balanceada, não há mecanismos para redistribuir automaticamente os nós, "
+                + "o que pode levar a uma estrutura assimétrica dependendo da ordem de inserção.\n\n"
+                + "Prós: Estrutura simples de implementar e entender. Mantém os elementos sempre ordenados e permite percursos em ordem (in-order) "
+                + "que retornam os valores em sequência crescente.\n\n"
+                + "Contras: Pode se tornar desbalanceada e perder eficiência, degradando para O(n) em operações de busca, inserção e remoção "
+                + "quando os dados são inseridos de forma sequencial.\n\n"
+                + "Complexidade: Busca, inserção e remoção — melhor caso O(log n), caso médio O(log n), pior caso O(n).";
+    }
 
     private void aviso(String msg) {
         JOptionPane.showMessageDialog(this, msg, "Informação", JOptionPane.INFORMATION_MESSAGE);
