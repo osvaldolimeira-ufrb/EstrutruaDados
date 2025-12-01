@@ -36,8 +36,7 @@ public class ArrayPanel extends JPanel {
         add(painelControles, BorderLayout.NORTH);
 
         painelDesenho = new VisualizacaoPanel();
-        painelDesenho.setBackground(Tema.BACKGROUND);
-        add(painelDesenho, BorderLayout.CENTER);
+        add(new JScrollPane(painelDesenho), BorderLayout.CENTER);
 
         JTextArea textoDefinicao = ComponentesUI.criarAreaTextoEstilizada();
         textoDefinicao.setText(getDefinicao());
@@ -123,8 +122,10 @@ public class ArrayPanel extends JPanel {
                 startX = (getWidth() - totalWidth) / 2;
             }
 
+            int x = startX;
+
             for (int i = 0; i < array.size(); i++) {
-                int x = startX + i * (boxWidth + espacamento);
+                x = startX + i * (boxWidth + espacamento);
 
                 // Gradiente para as caixas
                 GradientPaint gradient = new GradientPaint(
@@ -170,6 +171,9 @@ public class ArrayPanel extends JPanel {
                         x + (boxWidth - indexStringWidth) / 2,
                         y + boxHeight + 25);
             }
+
+            setPreferredSize(new Dimension(x + espacamento + 100, 200));
+            revalidate();
         }
     }
 }

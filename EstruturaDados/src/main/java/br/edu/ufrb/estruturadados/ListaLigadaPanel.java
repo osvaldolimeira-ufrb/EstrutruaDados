@@ -62,7 +62,7 @@ public class ListaLigadaPanel extends JPanel {
         add(painelControles, BorderLayout.NORTH);
 
         painelDesenho = new VisualizacaoPanel();
-        add(painelDesenho, BorderLayout.CENTER);
+        add(new JScrollPane(painelDesenho), BorderLayout.CENTER);
 
         JTextArea textoDefinicao = ComponentesUI.criarAreaTextoEstilizada();
         textoDefinicao.setText(getDefinicao());
@@ -159,9 +159,9 @@ public class ListaLigadaPanel extends JPanel {
             g2d.setFont(Tema.FONT_BUTTON);
             g2d.setColor(Tema.PRIMARY_DARK);
             g2d.drawString("HEAD", startX, y - 10);
-
+            int x = startX;
             for (int i = 0; i < lista.size(); i++) {
-                int x = startX + i * (NODE_WIDTH + GAP);
+                x = startX + i * (NODE_WIDTH + GAP);
 
                 // Nó (Parte de Dados)
                 g2d.setColor(Tema.NODE_DATA); // Verde do tema
@@ -206,6 +206,9 @@ public class ListaLigadaPanel extends JPanel {
                     g2d.drawString("NULL", x + NODE_WIDTH + 5, y + NODE_HEIGHT / 2 + 5);
                 }
             }
+
+            setPreferredSize(new Dimension(x + NODE_WIDTH + 100, 200));
+            revalidate();
         }
     }
 }

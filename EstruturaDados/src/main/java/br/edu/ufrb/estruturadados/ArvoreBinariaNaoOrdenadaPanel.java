@@ -47,10 +47,7 @@ public class ArvoreBinariaNaoOrdenadaPanel extends JPanel {
         painelControles.add(botaoRemover);
         add(painelControles, BorderLayout.NORTH);
 
-        // painelDesenho = new VisualizacaoPanel();
-        // add(new JScrollPane(painelDesenho), BorderLayout.CENTER);
         painelDesenho = new VisualizacaoPanel();
-
         JScrollPane scrollArvore = new JScrollPane(
                 painelDesenho,
                 JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
