@@ -47,8 +47,17 @@ public class ArvoreBinariaNaoOrdenadaPanel extends JPanel {
         painelControles.add(botaoRemover);
         add(painelControles, BorderLayout.NORTH);
 
+        // painelDesenho = new VisualizacaoPanel();
+        // add(new JScrollPane(painelDesenho), BorderLayout.CENTER);
         painelDesenho = new VisualizacaoPanel();
-        add(new JScrollPane(painelDesenho), BorderLayout.CENTER);
+
+        JScrollPane scrollArvore = new JScrollPane(
+                painelDesenho,
+                JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
+                JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED
+        );
+        scrollArvore.setBorder(null);
+        add(scrollArvore, BorderLayout.CENTER);
 
         JTextArea textoDefinicao = ComponentesUI.criarAreaTextoEstilizada();
         textoDefinicao.setText(getDefinicao());
@@ -231,8 +240,22 @@ public class ArvoreBinariaNaoOrdenadaPanel extends JPanel {
             setBorder(BorderFactory.createLineBorder(Tema.BORDER));
         }
 
+        private void atualizarTamanhoPanel() {
+            int altura = calcularAltura(raiz);
+            int largura = (int) Math.pow(2, altura) * 50;
+            int totalHeight = altura * 80 + 100;
+
+            setPreferredSize(new Dimension(
+                    Math.max(largura, 400),
+                    Math.max(totalHeight, 300)
+            ));
+            revalidate();
+        }
+
         @Override
         protected void paintComponent(Graphics g) {
+            atualizarTamanhoPanel();
+
             super.paintComponent(g);
             Graphics2D g2d = (Graphics2D) g;
             g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);

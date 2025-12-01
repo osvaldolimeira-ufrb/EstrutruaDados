@@ -277,7 +277,14 @@ public class HashMapPanel extends JPanel {
             this.tabelaHash = tabelaHash;
             this.capacidade = capacidade;
             this.indexDestaque = -1;
+
+            int w = 100, h = 60, gap = 20, cols = 5;
+            int rows = (int) Math.ceil(CAPACIDADE / (double) cols);
+            int totalHeight = rows * (h + gap) + 40;
+            setPreferredSize(new Dimension(getWidth(), totalHeight));
+
             repaint();
+            revalidate();
         }
 
         public void destacarTemporario(int index, Color cor, int msDestaque) {
@@ -299,8 +306,11 @@ public class HashMapPanel extends JPanel {
             g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
             int w = 100, h = 60, gap = 20, cols = 5;
+            int rows = (int) Math.ceil(CAPACIDADE / (double) cols);
+            int totalHeight = rows * (h + gap);
+            int startY = (getHeight() - totalHeight) / 2;
+            if (startY < 20) startY = 20;
             int startX = (getWidth() - (cols * (w + gap))) / 2;
-            int startY = 40;
 
             for (int i = 0; i < CAPACIDADE; i++) {
                 int r = i / cols;

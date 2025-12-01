@@ -4,7 +4,7 @@ import java.awt.*;
 
 public class Tema {
 
-    public static final Integer FIELD_HEIGHT_INFO = 150;
+    public static final Integer FIELD_HEIGHT_INFO = 100;
 
     public static final Integer FIELD_WIDTH_CODE = 100;
 
